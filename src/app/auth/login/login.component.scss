@@ -1,0 +1,19 @@
+@import "src/assets/styles/authForm";
+
+form {
+  height: 100%;
+  display: flex;
+  background: #1e1e1e;
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .auth-button {
+      margin-bottom: 40px;
+    }
+  }
+}

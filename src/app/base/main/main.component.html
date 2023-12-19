@@ -1,0 +1,83 @@
+<div class="container">
+    <div class="error text-center" *ngIf="error">
+        {{error}}
+    </div>
+
+    <ng-container *ngIf="!error">
+        <div *ngIf="isLoading" id="loader"></div>
+
+        <ng-container *ngIf="!isLoading">
+            <div class="books-head">
+                <div class="books-head-filters">
+<!--                    <app-filter class="books-filter"-->
+<!--                                (onFilterBooks)="filterBooks($event)"-->
+<!--                                (onCleanInput)="cleanSearchInput()"-->
+<!--                                [searchString]="searchString"-->
+<!--                    >-->
+<!--                    </app-filter>-->
+                </div>
+
+            </div>
+
+            <div class="filter-error" *ngIf="searchString.length > 0 && books.length === 0; else tableBooks">
+                К сожалению, по запросу "{{searchString}}" ничего не найдено.
+            </div>
+
+            <ng-template #tableBooks>
+                <table mat-table matSortDisableClear  matSort><!--[dataSource]="this.books"-->
+                       class="mat-elevation-z8">
+                    <ng-container matColumnDef="position">
+                        <th mat-header-cell *matHeaderCellDef>
+                            #
+                        </th>
+                        <td mat-cell *matCellDef="let i = index"> {{i + 1}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="image">
+                        <th class="table-image" mat-header-cell *matHeaderCellDef>
+                            Картинка
+                        </th>
+                        <td mat-cell *matCellDef="let book"><img src="{{book.image}}" alt="image"></td>
+                    </ng-container>
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header="title">
+                            Название
+                        </th>
+                        <td class="filterForm" mat-cell *matCellDef="let book"><a>{{book.title}}</a></td> <!--(click)="selectBook(book)"-->
+                    </ng-container>
+                    <ng-container matColumnDef="price">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header="price">
+                            Цена
+                        </th>
+                        <td mat-cell *matCellDef="let book"> BookPrice </td>
+                    </ng-container>
+                    <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef>
+                            Описание
+                        </th>
+                        <td mat-cell *matCellDef="let book"> BooksSubtitle </td>
+                    </ng-container>
+                    <ng-container matColumnDef="buy">
+                        <th mat-header-cell *matHeaderCellDef>
+                            Приобрести
+                        </th>
+                        <td mat-cell *matCellDef="let book">
+                            <div class="books-buttons">
+                                <button mat-raised-button color="primary"> <!-- (click)="addBookToCart(book)"-->
+                                    <span *ngIf="!book.count">Купить</span>
+                                    <span *ngIf="book.count > 0">+</span>
+                                </button>
+                                <span *ngIf="book.count > 0" class="books-count">{{book.count}}</span>
+                                <button mat-raised-button color="warn" *ngIf="book.count"> <!--(click)="removeBookFromCart(book)"-->
+                                    <span *ngIf="book.count > 0">-</span>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </ng-template>
+        </ng-container>
+    </ng-container>
+</div>

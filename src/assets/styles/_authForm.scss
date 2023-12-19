@@ -1,0 +1,107 @@
+// Общие для login & signup
+.auth-form {
+  display: flex;
+  text-align: center;
+  max-width: 1000px;
+  max-height: 700px;
+
+  .auth-form__left {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    width: 500px;
+    background: white;
+    border-bottom-left-radius: 20px;
+    border-top-left-radius: 20px;
+
+    .auth-form__title {
+      h1 {
+        font-size: 28px;
+        text-transform: uppercase;
+        margin-bottom: 0;
+      }
+
+      p {
+        margin-top: 0;
+        font-size: 15px;
+      }
+    }
+
+    .auth-inputs {
+      .auth-input {
+        margin-bottom: 15px;
+
+        input {
+          width: 400px;
+          border: 1px solid gray;
+          padding: 15px 0 15px 19px;
+          border-radius: 5px;
+        }
+      }
+
+      .auth-checkbox {
+        display: flex;
+        align-items: baseline;
+        margin-left: 35px;
+        margin-bottom: 20px;
+
+        input {
+          margin-right: 5px;
+          cursor: pointer;
+        }
+
+        label {
+          cursor: pointer;
+        }
+      }
+
+      .auth-button {
+        margin-bottom: 20px;
+
+        .button {
+          cursor: pointer;
+          width: 420px;
+          height: 50px;
+          background-color: black;
+          box-sizing: border-box;
+          color: white;
+          border: none;
+          border-radius: 30px;
+          transition: all .50s ease;
+
+          &:hover {
+            transform: translateY(-2px);
+          }
+
+          &:disabled {
+            background: gray;
+            cursor: not-allowed;
+          }
+        }
+      }
+
+      .auth-link {
+        font-size: 15px;
+
+        a {
+          text-decoration: none;
+          color: #047cbb;
+          font-weight: normal;
+        }
+      }
+    }
+  }
+
+  .page-image {
+    width: 500px;
+    overflow: hidden;
+    border-bottom-right-radius: 20px;
+    border-top-right-radius: 20px;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+

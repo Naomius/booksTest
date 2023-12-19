@@ -1,0 +1,32 @@
+.container {
+    padding: 20px 0 20px 0;
+    max-width: 1240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+    row-gap: 20px;
+
+    table {
+
+        img {
+            width: 100px;
+        }
+
+        td {
+
+            a {
+                cursor: pointer;
+
+                &:hover {
+                    color: #047cbb;
+                }
+            }
+
+        }
+    }
+
+
+}
+
+
