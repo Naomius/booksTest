@@ -5,9 +5,9 @@ import {BehaviorSubject, map} from "rxjs";
 
 
 @Injectable()
-export class MainFacadeService {
+export class BooksFacadeService {
     //возможно стартанут с of
-    private currentBooks$: IBook[] = new BehaviorSubject<IBook[]>([]);
+    private readonly currentBooks$: BehaviorSubject<IBook[]> = new BehaviorSubject<IBook[]>([]);
 
     constructor(private booksService: ApiBooksService) {
     }
@@ -17,11 +17,11 @@ export class MainFacadeService {
            .pipe(map(b => b.books))
            .subscribe({
                next: (book: IBook[]) => {
-                   this.currentBooks$ = book;
+                   this.currentBooks$.next(book)
                }
            })
     }
-    get booksAmount(): IBook[] {
+    get booksAmount(): BehaviorSubject<IBook[]> {
         return this.currentBooks$;
     }
 }

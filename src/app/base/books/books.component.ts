@@ -1,7 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {IBook} from "./interfaces/IBook";
-import {Subject} from "rxjs";
+import {BehaviorSubject, Subject} from "rxjs";
 import {Sort} from "@angular/material/sort";
+import {MainFacadeService} from "./facade/main.facade.service";
 
 @Component({
   selector: 'app-main',
@@ -18,10 +19,14 @@ export class MainComponent implements OnInit{
     private destroy$ = new Subject();
     displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
 
-    constructor() {
+    constructor(private mainFacadeService: MainFacadeService) {
     }
 
     ngOnInit(): void {
+    }
+
+    getBooks(): BehaviorSubject<IBook[]> {
+        return this.mainFacadeService.booksAmount;
     }
 
     //Сортировка
