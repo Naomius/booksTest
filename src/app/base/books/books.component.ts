@@ -1,5 +1,5 @@
 import {Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
-import {Book} from "./interfaces/IBook";
+import {Book, BooksCounter} from "./interfaces/IBook";
 import {map, merge, Observable, Subject, withLatestFrom} from "rxjs";
 import {Sort} from "@angular/material/sort";
 import {BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
@@ -96,7 +96,7 @@ export class BooksComponent implements OnInit {
 
     private initializeSideEffects(): void {
         this.bookCounterChange$.subscribe(e => {
-            this.mainFacadeService.updateBooksCounter(e);
+            this.mainFacadeService.updateBooks(e);
             e.count === 0 ?
                 console.log(`Убрали из заказа книгу по id ${e.id}`) :
                 console.log(`Заказали книгу по id ${e.id} в кол-ве ${e.count} шт.`);
@@ -105,12 +105,8 @@ export class BooksComponent implements OnInit {
 
 }
 
-export interface BooksCounter {
-    id: number,
-    count: number,
-}
 
 export interface IBooksManager {
     Books: Observable<Book[]>,
-    updateBooksCounter(newCounter: BooksCounter): void,
+    updateBooks(newBook: BooksCounter): void,
 }
