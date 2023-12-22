@@ -1,7 +1,7 @@
-import {Injectable, OnInit} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {IBook} from "../base/books/interfaces/IBook";
+import {Book} from "../../../base/books/interfaces/IBook";
 
 @Injectable({
   providedIn: 'root'
@@ -12,16 +12,14 @@ export class ApiBooksService{
     }
 
 
-  public getBooks(): Observable<IJson> {
+  public get Books(): Observable<IJson> {
       return this.http.get<IJson>('/assets/books.json');
   }
-
-
 
 }
 
 export interface IJson {
     error?: string,
     total?: string,
-    books: IBook[]
+    books: Book[]
 }

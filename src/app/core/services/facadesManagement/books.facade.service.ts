@@ -1,27 +1,23 @@
 import {Injectable} from "@angular/core";
-import {IBook} from "../interfaces/IBook";
-import {ApiBooksService} from "../../../services/apiBooks.service";
-import {BehaviorSubject, map} from "rxjs";
+import {BehaviorSubject, map, Observable} from "rxjs";
+import {Book} from "../../../base/books/interfaces/IBook";
+import {ApiBooksService} from "../apiService/apiBooks.service";
+import {IBooksManager} from "../../../base/books/books.component";
 
 
 @Injectable()
-export class BooksFacadeService {
-    //возможно стартанут с of
-    private readonly currentBooks$: BehaviorSubject<IBook[]> = new BehaviorSubject<IBook[]>([]);
+export class BooksFacadeService implements IBooksManager {
+
+    private readonly currentBooks$!: Observable<Book[]>;
 
     constructor(private booksService: ApiBooksService) {
+        this.currentBooks$ = this.booksService.Books.pipe(
+            map(b => b.books),
+        );
     }
 
-    setCurrentBooks(): void {
-       this.booksService.getBooks()
-           .pipe(map(b => b.books))
-           .subscribe({
-               next: (book: IBook[]) => {
-                   this.currentBooks$.next(book)
-               }
-           })
-    }
-    get booksAmount(): BehaviorSubject<IBook[]> {
+    get Books(): Observable<Book[]> {
         return this.currentBooks$;
     }
+
 }

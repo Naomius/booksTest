@@ -8,23 +8,27 @@
 
         <ng-container *ngIf="!isLoading">
             <div class="books-head">
-                <div class="books-head-filters">
-<!--                    <app-filter class="books-filter"-->
-<!--                                (onFilterBooks)="filterBooks($event)"-->
-<!--                                (onCleanInput)="cleanSearchInput()"-->
-<!--                                [searchString]="searchString"-->
-<!--                    >-->
-<!--                    </app-filter>-->
+                <div class="books-filter">
+                        <label class="filter__title" for="filter__input"></label>
+                        <input #filterInput Autofocus type="text" class="filter__input input" id="filter__input" placeholder="Введите название"
+                               (keyup)="filterBooks$.next(filterInput.value)"
+                        >
+                        <button class="btn btn-primary filter__clean-btn"
+                                [disabled]="!filterInput.value"
+                                (click)="cleanSearchInput()">Сбросить</button>
                 </div>
-
             </div>
 
-            <div class="filter-error" *ngIf="searchString.length > 0 && books.length === 0; else tableBooks">
-                К сожалению, по запросу "{{searchString}}" ничего не найдено.
+            <div class="filter-error" *ngIf="(sortedBooks$ | async)?.length < 1; else tableBooks">
+                К сожалению, по запросу "{{filterInput.value}}" ничего не найдено.
             </div>
 
             <ng-template #tableBooks>
-                <table mat-table matSortDisableClear  matSort><!--[dataSource]="this.books"-->
+                <table mat-table matSort matSortActive="created"
+                       matSortDisableClear
+                       matSortDirection="asc"
+                       [dataSource]="sortedBooks$ | async"
+                       (matSortChange)="sortBooks$.next($event)"
                        class="mat-elevation-z8">
                     <ng-container matColumnDef="position">
                         <th mat-header-cell *matHeaderCellDef>
@@ -48,13 +52,13 @@
                         <th mat-header-cell *matHeaderCellDef mat-sort-header="price">
                             Цена
                         </th>
-                        <td mat-cell *matCellDef="let book"> BookPrice </td>
+                        <td mat-cell *matCellDef="let book"> {{book.price | currency}} </td>
                     </ng-container>
                     <ng-container matColumnDef="description">
                         <th mat-header-cell *matHeaderCellDef>
                             Описание
                         </th>
-                        <td mat-cell *matCellDef="let book"> BooksSubtitle </td>
+                        <td mat-cell *matCellDef="let book"> {{book.subtitle}} </td>
                     </ng-container>
                     <ng-container matColumnDef="buy">
                         <th mat-header-cell *matHeaderCellDef>
@@ -62,14 +66,11 @@
                         </th>
                         <td mat-cell *matCellDef="let book">
                             <div class="books-buttons">
-                                <button mat-raised-button color="primary"> <!-- (click)="addBookToCart(book)"-->
-                                    <span *ngIf="!book.count">Купить</span>
-                                    <span *ngIf="book.count > 0">+</span>
-                                </button>
-                                <span *ngIf="book.count > 0" class="books-count">{{book.count}}</span>
-                                <button mat-raised-button color="warn" *ngIf="book.count"> <!--(click)="removeBookFromCart(book)"-->
-                                    <span *ngIf="book.count > 0">-</span>
-                                </button>
+                                <div class="counter">
+                                    <app-counter [initialText]="'Купить'"
+                                        (counterChange)="bookCounterChange$.next({id: book.id, count: $event})">
+                                    </app-counter>
+                                </div>
                             </div>
                         </td>
                     </ng-container>

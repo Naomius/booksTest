@@ -1,58 +1,113 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {IBook} from "./interfaces/IBook";
-import {BehaviorSubject, Subject} from "rxjs";
+import {AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
+import {Book} from "./interfaces/IBook";
+import {map, merge, Observable, share, Subject, tap, withLatestFrom} from "rxjs";
 import {Sort} from "@angular/material/sort";
-import {MainFacadeService} from "./facade/main.facade.service";
+import {BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
+import {BooksFacadeToken} from "./tokens/booksFacadeToken";
 
 @Component({
-  selector: 'app-main',
-  templateUrl: './main.component.html',
-  styleUrls: ['./main.component.scss']
+    selector: 'app-books',
+    templateUrl: './books.component.html',
+    styleUrls: ['./books.component.scss'],
+    providers: [
+        BooksFacadeService,
+        {provide: BooksFacadeToken, useExisting: BooksFacadeService}
+    ]
 })
-export class MainComponent implements OnInit{
+export class BooksComponent implements OnInit, AfterViewInit {
+    @ViewChild('filterInput') filterInput: ElementRef<HTMLInputElement>;
 
-    public books: IBook[] = [];
-    public booksCopy: IBook[] = []
-    public searchString = '';
     public error = '';
     public isLoading = false;
-    private destroy$ = new Subject();
     displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
+    public bookCounterChange$: Subject<{id: number, count: number}> = new Subject<{id: number, count: number}>;
 
-    constructor(private mainFacadeService: MainFacadeService) {
+    public books$!: Observable<Book[]>;
+    public filteredBooks$: Observable<Book[]>;
+    public sortedBooks$: Observable<Book[]>;
+    public filterBooks$: Subject<string> = new Subject<string>();
+    public sortBooks$: Subject<Sort> = new Subject<Sort>();
+
+
+    constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager) {
     }
+
 
     ngOnInit(): void {
+        this.books$ = this.mainFacadeService.Books;
+        //Фильтр
+        this.filteredBooks$ = merge(
+            this.books$,
+            this.filterBooks$.pipe(
+                withLatestFrom(this.books$),
+                map(([searchStr, books]) => {
+                    if (!searchStr.trim()) {
+                        return books;
+                    } else {
+                        return books.filter(book => book.title.toLocaleLowerCase()
+                                .includes(searchStr.toLowerCase())
+                            || book.subtitle.toLocaleLowerCase().includes(searchStr.toLowerCase()))
+                    }
+                })
+            )
+        );
+
+        this.sortedBooks$ = merge(
+            this.filteredBooks$,
+            this.sortBooks$.pipe(
+                withLatestFrom(this.filteredBooks$),
+                map(([sortEvent, books]) => {
+                    const booksData = books.slice();
+                    if (!sortEvent.active || sortEvent.direction === '') {
+                        return booksData
+                    } else {
+                        return booksData.sort(this.compare(sortEvent.active, sortEvent.direction === 'asc'))
+                    }
+                })
+            )
+        )
+
+        this.initializeSideEffects();
     }
 
-    getBooks(): BehaviorSubject<IBook[]> {
-        return this.mainFacadeService.booksAmount;
-    }
-
-    //Сортировка
-
-    sortBooks(sort: Sort): void {
-        console.log(sort)
-        const data = this.books.slice();
-        if (!sort.active || sort.direction === '') {
-            this.books = this.booksCopy;
-            return;
-        }
-        this.books = data.sort((a, b) => {
-            const isAsc = sort.direction === 'asc';
-            switch (sort.active) {
-                case 'title':
-                    return this.compare(a.title, b.title, isAsc);
-                case 'price':
-                    return this.compare(a.price, b.price, isAsc);
-                default:
-                    return 0;
+    compare(key: string, isAsc: boolean) {
+        return (a: Book, b: Book) => {
+            if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+                return 0;
             }
-        });
+
+            const varA = (typeof a[key] === 'string') ? a[key].toUpperCase() : a[key];
+            const varB = (typeof b[key] === 'string') ? b[key].toUpperCase() : b[key];
+
+            let comparison = 0;
+            if (varA > varB) {
+                comparison = 1;
+            } else if (varA < varB) {
+                comparison = -1;
+            }
+            return (isAsc ? comparison : (comparison * -1));
+        };
     }
 
-    compare(a: number | string, b: number | string, isAsc: boolean) {
-        return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+    public cleanSearchInput(): void {
+        this.filterBooks$.next('');
+        this.filterInput.nativeElement.value = '';
     }
 
+    private initializeSideEffects(): void {
+        this.bookCounterChange$.subscribe(e => {
+            e.count === 0 ?
+                console.log(`Убрали из заказа книгу по id ${e.id}`) :
+                console.log(`Заказали книгу по id ${e.id} в кол-ве ${e.count} шт.`);
+        })
+    }
+
+    ngAfterViewInit(): void {
+    }
+
+
+}
+
+export interface IBooksManager {
+    Books: Observable<Book[]>
 }

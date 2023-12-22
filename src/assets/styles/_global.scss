@@ -181,16 +181,18 @@ body {
 }
 
 .books-buttons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  font-size: large;
-  width: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    font-size: large;
+    width: 170px;
 
-  .books-count {
-    border: 1px solid #047cbb;
-    border-radius: 8px;
-    padding: 5px 10px;
-  }
+    .books-count {
+        width: 30px;
+        text-align: center;
+        border: 1px solid #047cbb;
+        border-radius: 8px;
+        padding: 5px 1px 5px 15px;
+    }
 }

@@ -1,20 +1,26 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MainRoutingModule} from './main-routing.module';
-import {MainComponent} from "./main.component";
+import {BooksRoutingModule} from './books-routing.module';
+import {BooksComponent} from "./books.component";
 import {SharedModule} from "../../shared/shared.module";
 import {FormsModule} from "@angular/forms";
+import {HttpClientModule} from "@angular/common/http";
+import {MatInputModule} from "@angular/material/input";
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {CounterComponent} from "../../shared/components/counter/counter.component";
 
 @NgModule({
     declarations: [
-        MainComponent,
+        BooksComponent,
     ],
     imports: [
         CommonModule,
         FormsModule,
+        HttpClientModule,
         SharedModule,
-        MainRoutingModule
+        BooksRoutingModule,
+        MatInputModule,
     ]
 })
-export class MainModule {
+export class BooksModule {
 }

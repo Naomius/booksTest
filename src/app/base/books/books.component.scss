@@ -7,6 +7,12 @@
     margin: 0 auto;
     row-gap: 20px;
 
+    .books-filter {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
     table {
 
         img {

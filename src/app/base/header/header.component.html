@@ -1,0 +1,37 @@
+<div class="container">
+    <div class="header-content">
+        <div class="header-content__title">
+            <h3>Тестовое задание</h3>
+        </div>
+        <div class="header-content__authorization">
+
+            <nav class="header-content__authorization-nav">
+                <ul>
+                    <li><a routerLink="/main" routerLinkActive="active">Главная</a></li>
+                    <li><a routerLink="/books" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Книги</a></li>
+                    <li class="header-content-cart">
+                        <a routerLink="/cart" routerLinkActive="active">Корзина</a>
+                        <div>booksAmount</div> <!---->
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="profile"  [matMenuTriggerFor]="menu"> <!--*ngIf="authUser"-->
+                <img class="profile__img" src="assets/images/enter.svg" alt="img">
+                <div class="profile__name">userName</div>
+            </div>
+
+            <mat-menu #menu="matMenu">
+                <button  mat-menu-item> <!--(click)="doLogout()"-->
+                    Выйти
+                </button>
+            </mat-menu>
+
+            <div class="profile"  routerLink="/login"> <!--*ngIf="!authUser"-->
+                <img class="profile__img" src="assets/images/enter.svg" alt="img">
+                <div class="profile__name">Авторизация</div>
+            </div>
+
+        </div>
+    </div>
+</div>

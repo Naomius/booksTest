@@ -1,0 +1,26 @@
+
+    <div class="counter_block" *ngIf="(currentValue$ | async) !== '0'">
+        <div class="left_arrow" (click)="leftArrowClick$.next()">
+            <button mat-raised-button color="primary">
+                -
+            </button>
+        </div>
+        <input #numInput
+               class="books-count"
+               type="number"
+               [value]="currentValue$ | async"
+               (change)="manualChange$.next(numInput.value)">
+        <div class="right_arrow" (click)="rightArrowClick$.next()">
+            <button mat-raised-button color="warn">
+                +
+            </button>
+        </div>
+    </div>
+    <div class="button_block" *ngIf="(currentValue$ | async) === '0'">
+        <button mat-raised-button color="primary" (click)="buttonClick$.next()">
+            {{initialText}}
+        </button>
+    </div>
+
+
+

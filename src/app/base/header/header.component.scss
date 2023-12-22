@@ -1,0 +1,111 @@
+:host {
+    display: block;
+    padding: 20px 0 20px 0;
+    background: #047cbb;
+    border-bottom: 1px solid #333;
+    box-shadow: 0 0 5px 3px rgb(86 86 86 / 30%);
+}
+
+.container {
+    max-width: 1440px;
+    margin: 0 auto;
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .header-content__title {
+            display: flex;
+            align-items: baseline;
+            column-gap: 40px;
+
+            h3 {
+                font-family: 'Montserrat', sans-serif;
+                margin-bottom: 0;
+                color: white;
+            }
+
+        }
+
+        .header-content__authorization {
+            display: flex;
+            align-items: center;
+            column-gap: 40px;
+
+            nav {
+                font-size: 16px;
+
+                ul {
+                    display: flex;
+                    justify-content: space-between;
+                }
+
+                li {
+                    position: relative;
+                    list-style: none;
+                    margin-right: 15px;
+                    border-bottom: 1px solid transparent;
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+
+                    a {
+                        text-decoration: none;
+                        color: white;
+                        cursor: pointer;
+                        background: linear-gradient(to right, transparent, transparent),
+                        linear-gradient(to right, #bcd1ff, #91B7FFFF);
+                        background-size: 100% 3px, 0 3px;
+                        background-position: 100% 100%, 0 100%;
+                        background-repeat: no-repeat;
+                        transition: background-size 400ms;
+
+                        &:hover {
+                            background-size: 0 2px, 100% 2px;
+                            text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
+                        }
+
+                        &.active {
+                            color: #29cbe8;
+                        }
+                    }
+
+                    div {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        position: absolute;
+                        background-color: red;
+                        color: white;
+                        font-size: 10px;
+                        top: 10px;
+                        left: 70px;
+                        border: 1px solid white;
+                        width: 16px;
+                        height: 15px;
+                        border-radius: 50%;
+                    }
+                }
+            }
+
+            .profile {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+
+                &__img {
+                    width: 30px;
+                }
+
+                &__name {
+                    margin-left: 8px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: white;
+                }
+            }
+        }
+    }
+}

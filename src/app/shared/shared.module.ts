@@ -8,13 +8,18 @@ import {MatButtonModule} from "@angular/material/button";
 import {NgPipesModule} from "ngx-pipes";
 import {FormsModule} from "@angular/forms";
 import {RouterLink} from "@angular/router";
+import { CounterComponent } from './components/counter/counter.component';
+import {BrowserModule} from "@angular/platform-browser";
 
 
 @NgModule({
-  declarations: [],
+  declarations: [
+  ],
     imports: [
         CommonModule,
         FormsModule,
+        BrowserModule,
+        CounterComponent,
         RouterLink
     ],
     exports: [
@@ -24,7 +29,8 @@ import {RouterLink} from "@angular/router";
         NgPipesModule,
         MatSortModule,
         MatTableModule,
-        MatButtonModule
+        MatButtonModule,
+        CounterComponent,
     ]
 })
 export class SharedModule { }
