@@ -20,11 +20,12 @@ export class BooksComponent implements OnInit {
     public error = ''; // перевести на Реактивщину
     public isLoading = false; // перевести на Реактивщину
     displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
-    public bookCounterChange$: Subject<BooksCounter> = new Subject<BooksCounter>;
 
     public books$!: Observable<Book[]>;
-    public filteredBooks$: Observable<Book[]>;
     public sortedBooks$: Observable<Book[]>;
+    public filteredBooks$: Observable<Book[]>;
+
+    public bookCounterChange$: Subject<BooksCounter> = new Subject<BooksCounter>;
     public filterBooks$: Subject<string> = new Subject<string>();
     public sortBooks$: Subject<Sort> = new Subject<Sort>();
 
@@ -96,7 +97,8 @@ export class BooksComponent implements OnInit {
 
     private initializeSideEffects(): void {
         this.bookCounterChange$.subscribe(e => {
-            this.mainFacadeService.updateBooks(e);
+            this.mainFacadeService.addBooksToCart(e);
+            // this.mainFacadeService.removeBooksFromCart(e);
             e.count === 0 ?
                 console.log(`Убрали из заказа книгу по id ${e.id}`) :
                 console.log(`Заказали книгу по id ${e.id} в кол-ве ${e.count} шт.`);
@@ -108,5 +110,6 @@ export class BooksComponent implements OnInit {
 
 export interface IBooksManager {
     Books: Observable<Book[]>,
-    updateBooks(newBook: BooksCounter): void,
+    addBooksToCart(newBook: BooksCounter): void,
+    removeBooksFromCart(bookId: number): void,
 }

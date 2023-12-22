@@ -14,7 +14,7 @@ export class CartStoreService {
 
    addToCart(book: Book, count: number = 1): void {
       const currentBooks = this.booksInCartSubject$.value;
-      const existingBook = currentBooks.find(book => book.id === book.id);
+      const existingBook = currentBooks.find(b => b.id === book.id);
 
       if (existingBook) {
           existingBook.count += count;
@@ -26,7 +26,7 @@ export class CartStoreService {
 
    removeFromCart(bookId: number): void {
       let currentBooks = this.booksInCartSubject$.value;
-      const bookIndex = currentBooks.findIndex(book => book.id === bookId);
+      const bookIndex = currentBooks.findIndex((book) => book.id === bookId);
 
       if (bookIndex !== -1) {
           currentBooks.splice(bookIndex, 1);

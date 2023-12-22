@@ -18,8 +18,12 @@ export class BooksFacadeService implements IBooksManager {
         );
     }
 
-    updateBooks(newBook: Book): void {
+    addBooksToCart(newBook: Book): void {
         this.cartStoreService.addToCart(newBook);
+    }
+
+    removeBooksFromCart(bookId: number): void {
+        this.cartStoreService.removeFromCart(bookId)
     }
 
     get Books(): Observable<Book[]> {

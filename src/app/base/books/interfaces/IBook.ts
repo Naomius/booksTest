@@ -13,12 +13,4 @@ export interface BooksCounter {
     count: number,
 }
 
-export interface Book extends BookDetails {
-    id: number,
-    title: string,
-    subtitle: string,
-    isbn13: string,
-    price: string,
-    image: string,
-    url: string,
-}
+export interface Book extends BookDetails, BooksCounter {}
