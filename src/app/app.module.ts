@@ -5,7 +5,6 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {SharedModule} from "./shared/shared.module";
 import {BooksModule} from "./base/books/books.module";
-import { HeaderComponent } from './base/header/header.component';
 import {HeaderModule} from "./base/header/header.module";
 
 @NgModule({

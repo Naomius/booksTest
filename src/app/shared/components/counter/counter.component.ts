@@ -44,6 +44,8 @@ export class CounterComponent {
         this.initializeSideEffects();
     }
 
+
+
     private initializeSideEffects(): void {
         this.buttonClick$.subscribe(_ => {
             this.rightArrowClick$.next();

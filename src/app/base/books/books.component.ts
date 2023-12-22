@@ -1,6 +1,6 @@
-import {AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
 import {Book} from "./interfaces/IBook";
-import {map, merge, Observable, share, Subject, tap, withLatestFrom} from "rxjs";
+import {map, merge, Observable, Subject, withLatestFrom} from "rxjs";
 import {Sort} from "@angular/material/sort";
 import {BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
 import {BooksFacadeToken} from "./tokens/booksFacadeToken";
@@ -14,13 +14,13 @@ import {BooksFacadeToken} from "./tokens/booksFacadeToken";
         {provide: BooksFacadeToken, useExisting: BooksFacadeService}
     ]
 })
-export class BooksComponent implements OnInit, AfterViewInit {
+export class BooksComponent implements OnInit {
     @ViewChild('filterInput') filterInput: ElementRef<HTMLInputElement>;
 
-    public error = '';
-    public isLoading = false;
+    public error = ''; // перевести на Реактивщину
+    public isLoading = false; // перевести на Реактивщину
     displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
-    public bookCounterChange$: Subject<{id: number, count: number}> = new Subject<{id: number, count: number}>;
+    public bookCounterChange$: Subject<BooksCounter> = new Subject<BooksCounter>;
 
     public books$!: Observable<Book[]>;
     public filteredBooks$: Observable<Book[]>;
@@ -61,7 +61,7 @@ export class BooksComponent implements OnInit, AfterViewInit {
                     if (!sortEvent.active || sortEvent.direction === '') {
                         return booksData
                     } else {
-                        return booksData.sort(this.compare(sortEvent.active, sortEvent.direction === 'asc'))
+                        return booksData.sort(this._compare(sortEvent.active, sortEvent.direction === 'asc'))
                     }
                 })
             )
@@ -70,7 +70,7 @@ export class BooksComponent implements OnInit, AfterViewInit {
         this.initializeSideEffects();
     }
 
-    compare(key: string, isAsc: boolean) {
+    private _compare(key: string, isAsc: boolean) {
         return (a: Book, b: Book) => {
             if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
                 return 0;
@@ -96,18 +96,21 @@ export class BooksComponent implements OnInit, AfterViewInit {
 
     private initializeSideEffects(): void {
         this.bookCounterChange$.subscribe(e => {
+            this.mainFacadeService.updateBooksCounter(e);
             e.count === 0 ?
                 console.log(`Убрали из заказа книгу по id ${e.id}`) :
                 console.log(`Заказали книгу по id ${e.id} в кол-ве ${e.count} шт.`);
         })
     }
 
-    ngAfterViewInit(): void {
-    }
+}
 
-
+export interface BooksCounter {
+    id: number,
+    count: number,
 }
 
 export interface IBooksManager {
-    Books: Observable<Book[]>
+    Books: Observable<Book[]>,
+    updateBooksCounter(newCounter: BooksCounter): void,
 }

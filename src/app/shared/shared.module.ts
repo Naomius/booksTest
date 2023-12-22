@@ -18,11 +18,11 @@ import {BrowserModule} from "@angular/platform-browser";
     imports: [
         CommonModule,
         FormsModule,
-        BrowserModule,
         CounterComponent,
         RouterLink
     ],
     exports: [
+        RouterLink,
         MatSortModule,
         MatSnackBarModule,
         MatMenuModule,

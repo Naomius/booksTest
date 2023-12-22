@@ -1,1 +1,45 @@
-<p>shopping-cart works!</p>
+<!--<app-emptyCart *ngIf="cartService.getTotalAmount() === 0"-->
+<!--               notFoundMessage="Корзина пустая!"-->
+<!--               resetLinkText="Вернуться на страницу книги"-->
+<!--&gt;-->
+<!--</app-emptyCart>-->
+
+<div  class="container"><!--*ngIf="cartService.getTotalAmount() > 0"-->
+    <ul>
+        <li><!--*ngFor="let book of cartService.booksList"-->
+            <div>
+                <img [src]="" [alt]="">
+            </div>
+            <div>
+                bookTitle
+            </div>
+            <div>
+                bookPrice
+            </div>
+            <div>
+                <div class="books-buttons">
+                    <button mat-raised-button color="primary" > <!--(click)="addBookToCart(book)"-->
+                        <span  class="book-item__span">Добавить в корзину</span> <!--*ngIf="!book.count"-->
+<!--                        <span *ngIf="book.count">+</span>-->
+                    </button>
+                    <span  class="books-count">bookCount</span> <!--*ngIf="book.count"-->
+                    <button mat-raised-button color="warn" ><!--*ngIf="book.count" (click)="removeBook(book)"-->
+                        <span>-</span> <!--*ngIf="book.count"-->
+                    </button>
+                </div>
+                <!--        <button mat-raised-button color="warn" (click)="removeBook(book)">-->
+                <!--          Удалить товар-->
+                <!--        </button>-->
+            </div>
+        </li>
+    </ul>
+
+    <div class="checkout">
+        <div>
+            <div class="books-count">TotalAmount</div>
+            <div class="total-price">TotalBooksPrice</div>
+        </div>
+    </div>
+
+</div>
+

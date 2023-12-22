@@ -9,8 +9,8 @@
         <ng-container *ngIf="!isLoading">
             <div class="books-head">
                 <div class="books-filter">
-                        <label class="filter__title" for="filter__input"></label>
-                        <input #filterInput Autofocus type="text" class="filter__input input" id="filter__input" placeholder="Введите название"
+                        <label class="filter_title" for="filter_input"></label>
+                        <input #filterInput Autofocus type="text" class="filter_input input" id="filter_input" placeholder="Введите название"
                                (keyup)="filterBooks$.next(filterInput.value)"
                         >
                         <button class="btn btn-primary filter__clean-btn"
@@ -24,12 +24,13 @@
             </div>
 
             <ng-template #tableBooks>
-                <table mat-table matSort matSortActive="created"
+                <table class="mat-elevation-z8"
+                       mat-table matSort matSortActive="created"
                        matSortDisableClear
                        matSortDirection="asc"
                        [dataSource]="sortedBooks$ | async"
                        (matSortChange)="sortBooks$.next($event)"
-                       class="mat-elevation-z8">
+                       >
                     <ng-container matColumnDef="position">
                         <th mat-header-cell *matHeaderCellDef>
                             #
