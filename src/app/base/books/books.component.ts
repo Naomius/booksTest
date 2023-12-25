@@ -1,6 +1,5 @@
-import {Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
-import {Book, BooksCounter} from "./interfaces/IBook";
-import {map, merge, Observable, Subject, withLatestFrom} from "rxjs";
+import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {filter, map, merge, Observable, Subject, takeUntil, tap, withLatestFrom} from "rxjs";
 import {Sort} from "@angular/material/sort";
 import {BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
 import {BooksFacadeToken} from "./tokens/booksFacadeToken";
@@ -14,11 +13,11 @@ import {BooksFacadeToken} from "./tokens/booksFacadeToken";
         {provide: BooksFacadeToken, useExisting: BooksFacadeService}
     ]
 })
-export class BooksComponent implements OnInit {
+export class BooksComponent implements OnInit, OnDestroy {
     @ViewChild('filterInput') filterInput: ElementRef<HTMLInputElement>;
 
-    public error = ''; // перевести на Реактивщину
-    public isLoading = false; // перевести на Реактивщину
+    public error = '';
+    public isLoading = false;
     displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
 
     public books$!: Observable<Book[]>;
@@ -28,6 +27,7 @@ export class BooksComponent implements OnInit {
     public bookCounterChange$: Subject<BooksCounter> = new Subject<BooksCounter>;
     public filterBooks$: Subject<string> = new Subject<string>();
     public sortBooks$: Subject<Sort> = new Subject<Sort>();
+    private unsubscribe$: Subject<void> = new Subject<void>();
 
 
     constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager) {
@@ -35,8 +35,7 @@ export class BooksComponent implements OnInit {
 
 
     ngOnInit(): void {
-        this.books$ = this.mainFacadeService.Books;
-        //Фильтр
+        this.books$ = this.mainFacadeService.getBooks();
         this.filteredBooks$ = merge(
             this.books$,
             this.filterBooks$.pipe(
@@ -96,20 +95,49 @@ export class BooksComponent implements OnInit {
     }
 
     private initializeSideEffects(): void {
-        this.bookCounterChange$.subscribe(e => {
-            this.mainFacadeService.addBooksToCart(e);
-            // this.mainFacadeService.removeBooksFromCart(e);
-            e.count === 0 ?
-                console.log(`Убрали из заказа книгу по id ${e.id}`) :
-                console.log(`Заказали книгу по id ${e.id} в кол-ве ${e.count} шт.`);
+        this.bookCounterChange$.pipe(
+            withLatestFrom(this.books$),
+            map(([bookCounter, books]) => {
+                const book = books.find(b => b.id === bookCounter.id);
+                return book ? {...book, count: bookCounter.count} : null;
+            }),
+            filter(bookCount => bookCount !== null),
+            takeUntil(this.unsubscribe$)
+        ).subscribe(bookCount => {
+            if (bookCount && bookCount.count) {
+                this.mainFacadeService.addBooksToCart(bookCount.id, bookCount.count);
+                console.log(`Заказали книгу по id ${bookCount.id} в кол-ве ${bookCount.count} шт.`)
+            } else if (bookCount) {
+                this.mainFacadeService.removeBooksFromCart(bookCount.id);
+                console.log(`Убрали из заказа книгу по id ${bookCount.id}`);
+            }
         })
+    }
+
+    ngOnDestroy(): void {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
     }
 
 }
 
-
 export interface IBooksManager {
-    Books: Observable<Book[]>,
-    addBooksToCart(newBook: BooksCounter): void,
+    getBooks(): Observable<Book[]>,
+    addBooksToCart(id: number, count: number): void,
     removeBooksFromCart(bookId: number): void,
+}
+
+export interface Book {
+    id: number,
+    title: string,
+    subtitle: string,
+    isbn13: string,
+    price: string,
+    image: string,
+    url: string,
+}
+
+export interface BooksCounter {
+    id: number,
+    count: number,
 }

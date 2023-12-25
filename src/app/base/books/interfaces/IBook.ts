@@ -1,4 +1,4 @@
-export interface BookDetails extends BooksCounter{
+export interface BookDetails{
     id: number,
     title: string,
     subtitle: string,
@@ -8,9 +8,4 @@ export interface BookDetails extends BooksCounter{
     url: string,
 }
 
-export interface BooksCounter {
-    id: number,
-    count: number,
-}
 
-export interface Book extends BookDetails, BooksCounter {}
