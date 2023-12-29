@@ -1,8 +1,22 @@
 import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {filter, map, merge, Observable, Subject, takeUntil, tap, withLatestFrom} from "rxjs";
+import {
+    BehaviorSubject, catchError,
+    combineLatest, EMPTY,
+    filter, finalize,
+    map,
+    Observable,
+    startWith,
+    Subject,
+    takeUntil, tap,
+} from "rxjs";
+
 import {Sort} from "@angular/material/sort";
 import {BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
 import {BooksFacadeToken} from "./tokens/booksFacadeToken";
+import {BooksFacadeHelper} from "../../shared/helpers/booksFacadeHelper";
+import {CartBookDetails} from "../../core/services/cartStore.service";
+import {Router} from "@angular/router";
+import {BooksAndBookHelperService} from "../../core/services/booksAndBookHelper.service";
 
 @Component({
     selector: 'app-books',
@@ -16,77 +30,48 @@ import {BooksFacadeToken} from "./tokens/booksFacadeToken";
 export class BooksComponent implements OnInit, OnDestroy {
     @ViewChild('filterInput') filterInput: ElementRef<HTMLInputElement>;
 
-    public error = '';
-    public isLoading = false;
     displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
 
     public books$!: Observable<Book[]>;
-    public sortedBooks$: Observable<Book[]>;
-    public filteredBooks$: Observable<Book[]>;
+    public currentBooksInCart: Observable<CartBookDetails[]>; //для актуальных данных с корзины
+    public filteredAndSortedBooks$: Observable<Book[]>;
 
     public bookCounterChange$: Subject<BooksCounter> = new Subject<BooksCounter>;
     public filterBooks$: Subject<string> = new Subject<string>();
     public sortBooks$: Subject<Sort> = new Subject<Sort>();
+    public error$: Subject<string> = new Subject<string>();
+    public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     private unsubscribe$: Subject<void> = new Subject<void>();
 
 
-    constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager) {
+    constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager,
+                private router: Router,
+                private booksHelper: BooksAndBookHelperService) {
     }
 
 
     ngOnInit(): void {
-        this.books$ = this.mainFacadeService.getBooks();
-        this.filteredBooks$ = merge(
-            this.books$,
-            this.filterBooks$.pipe(
-                withLatestFrom(this.books$),
-                map(([searchStr, books]) => {
-                    if (!searchStr.trim()) {
-                        return books;
-                    } else {
-                        return books.filter(book => book.title.toLocaleLowerCase()
-                                .includes(searchStr.toLowerCase())
-                            || book.subtitle.toLocaleLowerCase().includes(searchStr.toLowerCase()))
-                    }
-                })
-            )
+        this.isLoading$.next(true);
+        this.books$ = this.mainFacadeService.getBooks().pipe(
+            catchError(err => {
+                this.error$.next(err);
+                return EMPTY
+            }),
+            finalize(() => this.isLoading$.next(false)),
+            startWith([])
         );
 
-        this.sortedBooks$ = merge(
-            this.filteredBooks$,
-            this.sortBooks$.pipe(
-                withLatestFrom(this.filteredBooks$),
-                map(([sortEvent, books]) => {
-                    const booksData = books.slice();
-                    if (!sortEvent.active || sortEvent.direction === '') {
-                        return booksData
-                    } else {
-                        return booksData.sort(this._compare(sortEvent.active, sortEvent.direction === 'asc'))
-                    }
-                })
-            )
-        )
+        // this.currentBooksInCart = this.mainFacadeService.bookInCart$;
+
+        this.filteredAndSortedBooks$ = combineLatest([
+            this.books$.pipe(startWith([])),
+            this.filterBooks$.pipe(startWith('')),
+            this.sortBooks$.pipe(startWith(null))
+        ]).pipe(
+            map(([books, searchStr, sortEvent]) => BooksFacadeHelper._sortBooksByEvent(books, searchStr, sortEvent))
+        );
 
         this.initializeSideEffects();
-    }
-
-    private _compare(key: string, isAsc: boolean) {
-        return (a: Book, b: Book) => {
-            if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
-                return 0;
-            }
-
-            const varA = (typeof a[key] === 'string') ? a[key].toUpperCase() : a[key];
-            const varB = (typeof b[key] === 'string') ? b[key].toUpperCase() : b[key];
-
-            let comparison = 0;
-            if (varA > varB) {
-                comparison = 1;
-            } else if (varA < varB) {
-                comparison = -1;
-            }
-            return (isAsc ? comparison : (comparison * -1));
-        };
     }
 
     public cleanSearchInput(): void {
@@ -95,35 +80,43 @@ export class BooksComponent implements OnInit, OnDestroy {
     }
 
     private initializeSideEffects(): void {
-        this.bookCounterChange$.pipe(
-            withLatestFrom(this.books$),
-            map(([bookCounter, books]) => {
-                const book = books.find(b => b.id === bookCounter.id);
-                return book ? {...book, count: bookCounter.count} : null;
-            }),
-            filter(bookCount => bookCount !== null),
-            takeUntil(this.unsubscribe$)
-        ).subscribe(bookCount => {
-            if (bookCount && bookCount.count) {
-                this.mainFacadeService.addBooksToCart(bookCount.id, bookCount.count);
-                console.log(`Заказали книгу по id ${bookCount.id} в кол-ве ${bookCount.count} шт.`)
-            } else if (bookCount) {
-                this.mainFacadeService.removeBooksFromCart(bookCount.id);
-                console.log(`Убрали из заказа книгу по id ${bookCount.id}`);
+        combineLatest([this.bookCounterChange$, this.books$]).pipe(
+            map(([bookCounter, books]) => BooksFacadeHelper.mapBookCount(bookCounter, books)),
+            filter(bookWithCount => bookWithCount !== null),
+            takeUntil(this.unsubscribe$),
+            tap(console.log)
+        ).subscribe(bookWithCount => {
+            if (bookWithCount) {
+                const { book, count } = bookWithCount;
+                if (count > 0) {
+                    this.mainFacadeService.addBooksToCart(bookWithCount);
+                    console.log(`Заказали книгу по id ${book.id} в кол-ве ${count} шт.`);
+                }
+            } else {
+                this.mainFacadeService.removeBooksFromCart(bookWithCount.book.id);
+                console.log(`Убрали из заказа книгу по id ${bookWithCount.book.id}`);
             }
-        })
+        });
+    }
+
+    selectBook(book: Book) {
+        this.booksHelper.selectBook(book);
+        this.router.navigate(['/book'])
     }
 
     ngOnDestroy(): void {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
+        this.error$.complete();
+        this.isLoading$.complete();
     }
 
 }
 
 export interface IBooksManager {
     getBooks(): Observable<Book[]>,
-    addBooksToCart(id: number, count: number): void,
+    // bookInCart$: Observable<CartBookDetails[]>,
+    addBooksToCart(bookWithCount: BookWithCount): void,
     removeBooksFromCart(bookId: number): void,
 }
 
@@ -132,7 +125,7 @@ export interface Book {
     title: string,
     subtitle: string,
     isbn13: string,
-    price: string,
+    price: number,
     image: string,
     url: string,
 }
@@ -140,4 +133,9 @@ export interface Book {
 export interface BooksCounter {
     id: number,
     count: number,
+}
+
+export interface BookWithCount {
+    book: Book,
+    count: number
 }

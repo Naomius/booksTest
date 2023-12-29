@@ -1,6 +1,12 @@
-import {Component, Inject} from '@angular/core';
-import {ShoppingCartFacadeService} from "../../core/services/facadesManagement/shopping-cart.facade.service";
+import {Component, Inject, OnInit} from '@angular/core';
+import {
+    BookWithCount,
+    ShoppingCartFacadeService
+} from "../../core/services/facadesManagement/shopping-cart.facade.service";
 import {ShoppingCartFacadeToken} from "./tokens/shoppingCartFacadeToken";
+import {map, Observable, Subject} from "rxjs";
+import {CartBookDetails} from "../../core/services/cartStore.service";
+import {ShoppingCartHelper} from "./helpers/shoppingCartHelper";
 
 @Component({
     selector: 'app-shopping-cart',
@@ -11,13 +17,45 @@ import {ShoppingCartFacadeToken} from "./tokens/shoppingCartFacadeToken";
         {provide: ShoppingCartFacadeToken, useExisting: ShoppingCartFacadeService}
     ]
 })
-export class ShoppingCartComponent {
+export class ShoppingCartComponent implements OnInit{
 
     constructor(@Inject(ShoppingCartFacadeToken) private shoppingCartFacadeService: IShoppingCartManager) {
+    }
+
+    public books$: Observable<CartBookDetails[]>;
+    public totalBooksPrice$: Observable<number>;
+    public totalBooksCount$: Observable<number>;
+
+    public bookCounterChange$: Subject<CartBooksCounter> = new Subject<CartBooksCounter>();
+
+    ngOnInit(): void {
+        this.books$ = this.shoppingCartFacadeService.bookInCart$
+
+        const totals$ = ShoppingCartHelper._calculateTotals(this.books$)
+        this.totalBooksCount$ = totals$.pipe(map(totals => totals.count));
+        this.totalBooksPrice$ = totals$.pipe(map(totals => totals.price));
+
     }
 
 }
 
 export interface IShoppingCartManager {
+    bookInCart$: Observable<CartBookDetails[]>;
+    addBooksToCart(bookWithCount: BookWithCount): void,
+    removeBooksFromCart(bookId: number): void;
+}
 
+export interface CartBooks {
+    id: number,
+    title: string,
+    subtitle: string,
+    isbn13: string,
+    price: number,
+    image: string,
+    url: string,
+}
+
+export interface CartBooksCounter {
+    id: number,
+    count: number
 }

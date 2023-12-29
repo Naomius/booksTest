@@ -5,6 +5,7 @@ import {ShoppingCartComponent} from "./shopping-cart.component";
 import {EmptyCartComponent} from "./emptyCart/empty-cart.component";
 import {SharedModule} from "../../shared/shared.module";
 import {BrowserModule} from "@angular/platform-browser";
+import {MatButtonModule} from "@angular/material/button";
 
 @NgModule({
     declarations: [
@@ -14,6 +15,7 @@ import {BrowserModule} from "@angular/platform-browser";
     imports: [
         CommonModule,
         ShoppingCartRoutingModule,
+        MatButtonModule,
         SharedModule
     ]
 })

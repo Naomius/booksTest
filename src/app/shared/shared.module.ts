@@ -10,6 +10,7 @@ import {FormsModule} from "@angular/forms";
 import {RouterLink} from "@angular/router";
 import { CounterComponent } from './components/counter/counter.component';
 import {BrowserModule} from "@angular/platform-browser";
+import {HttpClientModule} from "@angular/common/http";
 
 
 @NgModule({
@@ -23,6 +24,7 @@ import {BrowserModule} from "@angular/platform-browser";
     ],
     exports: [
         RouterLink,
+        HttpClientModule,
         MatSortModule,
         MatSnackBarModule,
         MatMenuModule,

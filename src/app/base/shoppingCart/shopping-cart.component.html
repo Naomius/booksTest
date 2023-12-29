@@ -1,43 +1,37 @@
-<!--<app-emptyCart *ngIf="cartService.getTotalAmount() === 0"-->
-<!--               notFoundMessage="Корзина пустая!"-->
-<!--               resetLinkText="Вернуться на страницу книги"-->
-<!--&gt;-->
-<!--</app-emptyCart>-->
+<app-empty-cart *ngIf="!(totalBooksCount$ | async)"
+               notFoundMessage="Корзина пустая!"
+               resetLinkText="Вернуться на страницу книги"
+>
+</app-empty-cart>
 
-<div  class="container"><!--*ngIf="cartService.getTotalAmount() > 0"-->
+<div  class="container" *ngIf="totalBooksCount$ | async">
     <ul>
-        <li><!--*ngFor="let book of cartService.booksList"-->
+        <li *ngFor="let book of books$ | async">
             <div>
-                <img [src]="" [alt]="">
+                <img [src]="book.image" [alt]="book.title">
             </div>
             <div>
-                bookTitle
+                {{ book.title }}
             </div>
             <div>
-                bookPrice
+                {{ book.price | currency }}
             </div>
             <div>
                 <div class="books-buttons">
-                    <button mat-raised-button color="primary" > <!--(click)="addBookToCart(book)"-->
-                        <span  class="book-item__span">Добавить в корзину</span> <!--*ngIf="!book.count"-->
-<!--                        <span *ngIf="book.count">+</span>-->
-                    </button>
-                    <span  class="books-count">bookCount</span> <!--*ngIf="book.count"-->
-                    <button mat-raised-button color="warn" ><!--*ngIf="book.count" (click)="removeBook(book)"-->
-                        <span>-</span> <!--*ngIf="book.count"-->
-                    </button>
+                   <div class="counter">
+                       <app-counter [initialText]="'Купить'"
+                                    (counterChange)="bookCounterChange$.next({id: book.id, count: $event})">
+                       </app-counter>
+                   </div>
                 </div>
-                <!--        <button mat-raised-button color="warn" (click)="removeBook(book)">-->
-                <!--          Удалить товар-->
-                <!--        </button>-->
             </div>
         </li>
     </ul>
 
     <div class="checkout">
         <div>
-            <div class="books-count">TotalAmount</div>
-            <div class="total-price">TotalBooksPrice</div>
+            <div class="books-count">{{ totalBooksCount$ | async }} шт.</div>
+            <div class="total-price">{{ totalBooksPrice$ | async | currency }}</div>
         </div>
     </div>
 

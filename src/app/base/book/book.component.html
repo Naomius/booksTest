@@ -1,1 +1,30 @@
-<p>book works!</p>
+<div class="container" *ngIf="book$ | async as book; else noBookSelected">
+    <div class="book-items">
+        <div class="book-item__image">
+            <img src="{{book.image}}" alt="book">
+        </div>
+        <div class="book-item__about">
+            <h2 class="book-item__title">{{book.title}}</h2>
+            <div class="book-item__text">{{book.subtitle}}</div>
+            <div class="book-item__price">Цена: {{book.price | currency}}</div>
+            <div class="book-item__button">
+                <button routerLink="/books" mat-raised-button color="primary">На страницу книги</button>
+            </div>
+            <div class="books-buttons">
+                <div class="counter">
+                    <app-counter [initialText]="'Купить'"
+                                 (counterChange)="bookCounterChange$.next({id: book.id, count: $event})">
+                    </app-counter>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<ng-template #noBookSelected>
+    <p>Книга не выбрана</p>
+</ng-template>
+
+
+
+

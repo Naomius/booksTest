@@ -1,0 +1,42 @@
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    row-gap: 20px;
+    padding-top: 100px;
+
+    .book-items {
+        display: flex;
+        align-items: center;
+        text-align: center;
+
+        .book-item__text {
+            margin-bottom: 10px;
+        }
+
+        .book-item__price {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .book-item__button {
+
+            button {
+                cursor: pointer;
+                width: 187px;
+                height: 38px;
+                margin-bottom: 10px;
+            }
+        }
+
+        .books-buttons {
+            width: 100%;
+
+            .book-button__plus {
+                background-color: #047cbb;
+            }
+        }
+    }
+}
+
+

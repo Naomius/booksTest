@@ -1,12 +1,12 @@
 <div class="container">
-    <div class="error text-center" *ngIf="error">
-        {{error}}
+    <div class="error text-center" *ngIf="(error$ | async)">
+        {{ error$ | async }}
     </div>
 
-    <ng-container *ngIf="!error">
-        <div *ngIf="isLoading" id="loader"></div>
+    <ng-container *ngIf="!(error$ | async)">
+        <div *ngIf="(isLoading$ | async)" id="loader"></div>
 
-        <ng-container *ngIf="!isLoading">
+        <ng-container *ngIf="!(isLoading$ | async)">
             <div class="books-head">
                 <div class="books-filter">
                         <label class="filter_title" for="filter_input"></label>
@@ -19,16 +19,16 @@
                 </div>
             </div>
 
-            <div class="filter-error" *ngIf="(sortedBooks$ | async)?.length < 1; else tableBooks">
+            <div class="filter-error" *ngIf="(filteredAndSortedBooks$ | async)?.length < 1; else tableBooks">
                 К сожалению, по запросу "{{filterInput.value}}" ничего не найдено.
             </div>
 
             <ng-template #tableBooks>
                 <table class="mat-elevation-z8"
-                        mat-table matSort matSortActive="created"
+                       mat-table matSort matSortActive="created"
                        matSortDisableClear
                        matSortDirection="asc"
-                       [dataSource]="sortedBooks$ | async"
+                       [dataSource]="filteredAndSortedBooks$ | async"
                        (matSortChange)="sortBooks$.next($event)"
                        >
                     <ng-container matColumnDef="position">
@@ -47,7 +47,7 @@
                         <th mat-header-cell *matHeaderCellDef mat-sort-header="title">
                             Название
                         </th>
-                        <td class="filterForm" mat-cell *matCellDef="let book"><a>{{book.title}}</a></td> <!--(click)="selectBook(book)"-->
+                        <td class="filterForm" mat-cell *matCellDef="let book"><a (click)="selectBook(book)">{{book.title}}</a></td>
                     </ng-container>
                     <ng-container matColumnDef="price">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header="price">

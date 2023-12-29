@@ -11,7 +11,9 @@
                     <li><a routerLink="/books" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Книги</a></li>
                     <li class="header-content-cart">
                         <a routerLink="/cart" routerLinkActive="active">Корзина</a>
-                        <div>booksAmount</div> <!---->
+                        <div>
+                            {{ getTotalAmount() | async }}
+                        </div>
                     </li>
                 </ul>
             </nav>

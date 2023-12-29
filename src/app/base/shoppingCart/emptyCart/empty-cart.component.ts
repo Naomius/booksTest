@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
   selector: 'app-empty-cart',
@@ -6,5 +6,9 @@ import { Component } from '@angular/core';
   styleUrls: ['./empty-cart.component.scss']
 })
 export class EmptyCartComponent {
+
+    @Input() notFoundMessage: string = "Nothing Found!";
+    @Input() resetLinkText: string = "Reset";
+    @Input() resetLinkRoute: string = "/";
 
 }

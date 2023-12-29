@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { BookRoutingModule } from './book-routing.module';
 import {BookComponent} from "./book.component";
 import {HttpClientModule} from "@angular/common/http";
+import {CounterComponent} from "../../shared/components/counter/counter.component";
+import {SharedModule} from "../../shared/shared.module";
 
 
 @NgModule({
@@ -12,8 +14,9 @@ import {HttpClientModule} from "@angular/common/http";
     ],
     imports: [
         CommonModule,
+        SharedModule,
         HttpClientModule,
-        BookRoutingModule
+        BookRoutingModule,
     ]
 })
 export class BookModule { }
