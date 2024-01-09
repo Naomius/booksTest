@@ -35,8 +35,8 @@ export class BooksFacadeHelper {
         return filteredBooks
     }
 
-    public static mapBookCount(bookCounter: BooksCounter, books: Book[]): BookWithCount | null {
-         const book = books.find(b => b.id === bookCounter.id);
-         return book ? {book, count: bookCounter.count} : null;
-    }
+    // public static mapBookCount(bookCounter: BooksCounter, books: Book[]): BookWithCount | null {
+    //      const book = books.find(b => b.id === bookCounter.id);
+    //      return book ? {book, count: bookCounter.count} : null;
+    // }
 }

@@ -5,7 +5,7 @@ import {
 } from "../../core/services/facadesManagement/shopping-cart.facade.service";
 import {ShoppingCartFacadeToken} from "./tokens/shoppingCartFacadeToken";
 import {map, Observable, Subject} from "rxjs";
-import {CartBookDetails} from "../../core/services/cartStore.service";
+import {CartBook} from "../../core/services/cartStore.service";
 import {ShoppingCartHelper} from "./helpers/shoppingCartHelper";
 
 @Component({
@@ -22,7 +22,7 @@ export class ShoppingCartComponent implements OnInit{
     constructor(@Inject(ShoppingCartFacadeToken) private shoppingCartFacadeService: IShoppingCartManager) {
     }
 
-    public books$: Observable<CartBookDetails[]>;
+    public books$: Observable<CartBook[]>;
     public totalBooksPrice$: Observable<number>;
     public totalBooksCount$: Observable<number>;
 
@@ -31,16 +31,16 @@ export class ShoppingCartComponent implements OnInit{
     ngOnInit(): void {
         this.books$ = this.shoppingCartFacadeService.bookInCart$
 
-        const totals$ = ShoppingCartHelper._calculateTotals(this.books$)
-        this.totalBooksCount$ = totals$.pipe(map(totals => totals.count));
-        this.totalBooksPrice$ = totals$.pipe(map(totals => totals.price));
+        // const totals$ = ShoppingCartHelper._calculateTotals(this.books$)
+        // this.totalBooksCount$ = totals$.pipe(map(totals => totals.count));
+        // this.totalBooksPrice$ = totals$.pipe(map(totals => totals.price));
 
     }
 
 }
 
 export interface IShoppingCartManager {
-    bookInCart$: Observable<CartBookDetails[]>;
+    bookInCart$: Observable<CartBook[]>;
     addBooksToCart(bookWithCount: BookWithCount): void,
     removeBooksFromCart(bookId: number): void;
 }

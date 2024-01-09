@@ -7,14 +7,14 @@ import {
     Observable,
     startWith,
     Subject,
-    takeUntil, tap,
+    takeUntil,
 } from "rxjs";
 
 import {Sort} from "@angular/material/sort";
 import {BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
 import {BooksFacadeToken} from "./tokens/booksFacadeToken";
 import {BooksFacadeHelper} from "../../shared/helpers/booksFacadeHelper";
-import {CartBookDetails} from "../../core/services/cartStore.service";
+import {CartBook} from "../../core/services/cartStore.service";
 import {Router} from "@angular/router";
 import {BooksAndBookHelperService} from "../../core/services/booksAndBookHelper.service";
 
@@ -33,7 +33,7 @@ export class BooksComponent implements OnInit, OnDestroy {
     displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
 
     public books$!: Observable<Book[]>;
-    public currentBooksInCart: Observable<CartBookDetails[]>; //для актуальных данных с корзины
+    public currentBooksInCart: Observable<CartBook[]>; //для актуальных данных с корзины
     public filteredAndSortedBooks$: Observable<Book[]>;
 
     public bookCounterChange$: Subject<BooksCounter> = new Subject<BooksCounter>;
@@ -51,14 +51,14 @@ export class BooksComponent implements OnInit, OnDestroy {
 
 
     ngOnInit(): void {
-        this.isLoading$.next(true);
+        // this.isLoading$.next(true);
         this.books$ = this.mainFacadeService.getBooks().pipe(
+            startWith([]),
             catchError(err => {
                 this.error$.next(err);
                 return EMPTY
             }),
             finalize(() => this.isLoading$.next(false)),
-            startWith([])
         );
 
         // this.currentBooksInCart = this.mainFacadeService.bookInCart$;
@@ -68,7 +68,7 @@ export class BooksComponent implements OnInit, OnDestroy {
             this.filterBooks$.pipe(startWith('')),
             this.sortBooks$.pipe(startWith(null))
         ]).pipe(
-            map(([books, searchStr, sortEvent]) => BooksFacadeHelper._sortBooksByEvent(books, searchStr, sortEvent))
+            map(([books, searchStr, sortEvent]) => BooksFacadeHelper._sortBooksByEvent(books, searchStr, sortEvent)),
         );
 
         this.initializeSideEffects();
@@ -80,23 +80,19 @@ export class BooksComponent implements OnInit, OnDestroy {
     }
 
     private initializeSideEffects(): void {
-        combineLatest([this.bookCounterChange$, this.books$]).pipe(
-            map(([bookCounter, books]) => BooksFacadeHelper.mapBookCount(bookCounter, books)),
-            filter(bookWithCount => bookWithCount !== null),
-            takeUntil(this.unsubscribe$),
-            tap(console.log)
-        ).subscribe(bookWithCount => {
-            if (bookWithCount) {
-                const { book, count } = bookWithCount;
-                if (count > 0) {
-                    this.mainFacadeService.addBooksToCart(bookWithCount);
-                    console.log(`Заказали книгу по id ${book.id} в кол-ве ${count} шт.`);
-                }
-            } else {
-                this.mainFacadeService.removeBooksFromCart(bookWithCount.book.id);
-                console.log(`Убрали из заказа книгу по id ${bookWithCount.book.id}`);
+        this.bookCounterChange$.pipe(
+            filter(bookToCart => bookToCart && (bookToCart.count > 0 || bookToCart.count === 0)),
+            takeUntil(this.unsubscribe$)
+        ).subscribe(bookToCart => {
+            if (bookToCart.count > 0) {
+                console.log(`Заказали книгу по id ${bookToCart.id} в кол-ве ${bookToCart.count} шт.`);
+                this.mainFacadeService.addBooksToCart({ id: bookToCart.id, count: bookToCart.count });
+            } else if (bookToCart.count === 0) {
+                console.log(`Убрали из заказа книгу по id ${bookToCart.id}`);
+                this.mainFacadeService.removeBooksFromCart(bookToCart.id)
             }
         });
+
     }
 
     selectBook(book: Book) {
@@ -116,7 +112,7 @@ export class BooksComponent implements OnInit, OnDestroy {
 export interface IBooksManager {
     getBooks(): Observable<Book[]>,
     // bookInCart$: Observable<CartBookDetails[]>,
-    addBooksToCart(bookWithCount: BookWithCount): void,
+    addBooksToCart(bookToCart: BooksCounter): void,
     removeBooksFromCart(bookId: number): void,
 }
 
@@ -135,7 +131,8 @@ export interface BooksCounter {
     count: number,
 }
 
-export interface BookWithCount {
-    book: Book,
+export interface BookWithCount extends Book{
     count: number
 }
+
+

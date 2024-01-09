@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {BehaviorSubject, map, Observable} from "rxjs";
 import {ApiBooksService} from "../apiService/apiBooks.service";
 import {IBooksManager} from "../../../base/books/books.component";
-import {CartBookDetails, CartStoreService} from "../cartStore.service";
+import {CartBook, CartStoreService} from "../cartStore.service";
 
 
 @Injectable()
@@ -12,8 +12,8 @@ export class BooksFacadeService implements IBooksManager {
                 private cartStoreService: CartStoreService) {
     }
 
-    addBooksToCart(bookWithCount: BookWithCount): void {
-        this.cartStoreService.addToCart(bookWithCount);
+    addBooksToCart(booksCounter: BooksCounter): void {
+        this.cartStoreService.addToCart(booksCounter)
     }
 
     removeBooksFromCart(bookId: number): void {
@@ -46,7 +46,7 @@ export interface Book {
     url: string,
 }
 
-export interface BookWithCount {
-    book: Book,
-    count: number
+export interface BooksCounter {
+    id: number,
+    count: number,
 }

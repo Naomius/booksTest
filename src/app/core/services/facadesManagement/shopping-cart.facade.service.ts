@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {IShoppingCartManager} from "../../../base/shoppingCart/shopping-cart.component";
 import {Observable} from "rxjs";
-import {CartBookDetails, CartStoreService} from "../cartStore.service";
+import {CartBook, CartStoreService} from "../cartStore.service";
 
 @Injectable()
 export class ShoppingCartFacadeService implements IShoppingCartManager {
@@ -9,14 +9,14 @@ export class ShoppingCartFacadeService implements IShoppingCartManager {
   constructor(private cartStoreService: CartStoreService) { }
 
     addBooksToCart(bookWithCount: BookWithCount): void {
-      this.cartStoreService.addToCart(bookWithCount);
+      // this.cartStoreService.addToCart(bookWithCount);
     }
 
     removeBooksFromCart(bookId: number): void {
-      this.cartStoreService.removeFromCart(bookId);
+      // this.cartStoreService.removeFromCart(bookId);
     }
 
-    get bookInCart$(): Observable<CartBookDetails[]> {
+    get bookInCart$(): Observable<CartBook[]> {
       return this.cartStoreService.booksInCart$;
     }
 
