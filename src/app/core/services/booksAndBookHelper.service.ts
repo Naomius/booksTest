@@ -4,7 +4,7 @@ import {BehaviorSubject} from "rxjs";
 @Injectable({
     providedIn: 'root'
 })
-export class BooksAndBookHelperService {
+export class BooksAndBookHelperService {  //убрать сервис
     private selectedBookSubject = new BehaviorSubject<Book | null>(null);
     selectedBookAction$ = this.selectedBookSubject.asObservable();
 

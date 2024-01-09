@@ -1,8 +1,8 @@
-import {Book, BooksCounter, BookWithCount} from "../../base/books/books.component";
+import { Book } from "../../base/books/books.component";
 
 
 export class BooksFacadeHelper {
-     public static _compare(key: string, isAsc: boolean) {
+     public static compare(key: string, isAsc: boolean) {
         return (a: Book, b: Book) => {
             if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
                 return 0;
@@ -21,14 +21,16 @@ export class BooksFacadeHelper {
         };
     }
 
-    public static _sortBooksByEvent(books: Book[], searchStr: string, sortEvent): Book[] {
-        let filteredBooks = searchStr.trim() ? books.filter(book =>
-            book.title.toLocaleLowerCase().includes(searchStr.toLowerCase()) ||
-            book.subtitle.toLocaleLowerCase().includes(searchStr.toLowerCase())
-        ) : [...books]
+    public static sortBooksByEvent(books: Book[], searchStr: string, sortEvent): Book[] {
+        let filteredBooks = searchStr.trim() ?
+            books.filter(book =>
+                book.title.toLocaleLowerCase().includes(searchStr.toLowerCase()) ||
+                book.subtitle.toLocaleLowerCase().includes(searchStr.toLowerCase())
+            ) :
+            [...books]
 
         if (sortEvent && sortEvent.active && sortEvent.direction) {
-            return filteredBooks.sort(this._compare(sortEvent.active, sortEvent.direction === 'asc'));
+            return filteredBooks.sort(this.compare(sortEvent.active, sortEvent.direction === 'asc'));
 
         }
 

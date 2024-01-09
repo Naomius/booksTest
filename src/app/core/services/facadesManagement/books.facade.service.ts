@@ -20,13 +20,17 @@ export class BooksFacadeService implements IBooksManager {
         this.cartStoreService.removeFromCart(bookId);
     }
 
-    getBooks(): Observable<Book[]> {
+    getBooks(): Observable<Book[]> {   //TODO добавить геттер для получения книг
         return this.apiBooksService.Books.pipe(
             map(json => json.books.map(book => ({
                 ...book,
                     price: Number(book.price.replace(/[^0-9\.-]+/g, ""))
             })))
         );
+    }
+
+    get Books(): Observable<Book[]> {
+        return this.getBooks();
     }
 
     //Получение текущено значения книг из корзины

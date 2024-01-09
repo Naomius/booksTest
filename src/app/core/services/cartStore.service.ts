@@ -1,14 +1,14 @@
 
 import { Injectable } from '@angular/core';
 import {BehaviorSubject, Subject, merge, scan, Observable, map, tap} from 'rxjs';
-import {BooksCounter} from "../../base/books/books.component";
+import {BookId} from "../../base/books/books.component";
 
 @Injectable({
     providedIn: 'root'
 })
 export class CartStoreService {
     private readonly booksInCartSubject$ = new BehaviorSubject<CartBook[]>([]);
-    private bookAddSubject$ = new Subject<BooksCounter>();
+    private bookAddSubject$ = new Subject<BookId>();
     private bookRemoveSubject$ = new Subject<number>();
 
     constructor() {
@@ -25,15 +25,13 @@ export class CartStoreService {
             ),
             this.bookRemoveSubject$.pipe(
                 map((bookId: number) => (currentBooks: CartBook[]) => currentBooks.filter(book => book.id !== bookId)),
-                tap(console.log)
             )
         ).pipe(
             scan((books: CartBook[], operation) => operation(books), []),
-            tap(console.log),
         ).subscribe(this.booksInCartSubject$);
     }
 
-    addToCart(cartBook: BooksCounter): void {
+    addToCart(cartBook: BookId): void {
         this.bookAddSubject$.next(cartBook);
     }
 

@@ -36,7 +36,7 @@ export class BooksComponent implements OnInit, OnDestroy {
     public currentBooksInCart: Observable<CartBook[]>; //для актуальных данных с корзины
     public filteredAndSortedBooks$: Observable<Book[]>;
 
-    public bookCounterChange$: Subject<BooksCounter> = new Subject<BooksCounter>;
+    public bookCounterChange$: Subject<BookId> = new Subject<BookId>;
     public filterBooks$: Subject<string> = new Subject<string>();
     public sortBooks$: Subject<Sort> = new Subject<Sort>();
     public error$: Subject<string> = new Subject<string>();
@@ -64,11 +64,11 @@ export class BooksComponent implements OnInit, OnDestroy {
         // this.currentBooksInCart = this.mainFacadeService.bookInCart$;
 
         this.filteredAndSortedBooks$ = combineLatest([
-            this.books$.pipe(startWith([])),
+            this.books$.pipe(startWith([])),  //TODO поправить
             this.filterBooks$.pipe(startWith('')),
             this.sortBooks$.pipe(startWith(null))
         ]).pipe(
-            map(([books, searchStr, sortEvent]) => BooksFacadeHelper._sortBooksByEvent(books, searchStr, sortEvent)),
+            map(([books, searchStr, sortEvent]) => BooksFacadeHelper.sortBooksByEvent(books, searchStr, sortEvent)),
         );
 
         this.initializeSideEffects();
@@ -81,7 +81,7 @@ export class BooksComponent implements OnInit, OnDestroy {
 
     private initializeSideEffects(): void {
         this.bookCounterChange$.pipe(
-            filter(bookToCart => bookToCart && (bookToCart.count > 0 || bookToCart.count === 0)),
+            filter(bookToCart => bookToCart.count >= 0),
             takeUntil(this.unsubscribe$)
         ).subscribe(bookToCart => {
             if (bookToCart.count > 0) {
@@ -95,7 +95,7 @@ export class BooksComponent implements OnInit, OnDestroy {
 
     }
 
-    selectBook(book: Book) {
+    selectBook(book: Book) {  // TODO убрать, получение через фасад книги(можем передать через шаблон id и занавигейтится в book, а в book facade принимаем и обрабатываем.
         this.booksHelper.selectBook(book);
         this.router.navigate(['/book'])
     }
@@ -112,7 +112,7 @@ export class BooksComponent implements OnInit, OnDestroy {
 export interface IBooksManager {
     getBooks(): Observable<Book[]>,
     // bookInCart$: Observable<CartBookDetails[]>,
-    addBooksToCart(bookToCart: BooksCounter): void,
+    addBooksToCart(bookToCart: BookId): void,
     removeBooksFromCart(bookId: number): void,
 }
 
@@ -126,7 +126,7 @@ export interface Book {
     url: string,
 }
 
-export interface BooksCounter {
+export interface BookId {   // TODO поправить нейминг
     id: number,
     count: number,
 }

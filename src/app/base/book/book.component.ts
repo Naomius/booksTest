@@ -3,7 +3,7 @@ import {BookFacadeService} from "../../core/services/facadesManagement/book.faca
 import {BookFacadeToken} from "./tokens/BookFacadeToken";
 import {BooksAndBookHelperService} from "../../core/services/booksAndBookHelper.service";
 import {Observable, Subject} from "rxjs";
-import {BooksCounter} from "../books/books.component";
+import {BookId} from "../books/books.component";
 import {Router} from "@angular/router";
 
 @Component({
@@ -17,7 +17,7 @@ import {Router} from "@angular/router";
 })
 export class BookComponent implements OnInit{
     book$: Observable<Book | null>;
-    public bookCounterChange$: Subject<BooksCounter> = new Subject<BooksCounter>;
+    public bookCounterChange$: Subject<BookId> = new Subject<BookId>;
     constructor(@Inject(BookFacadeToken) private bookFacadeService: IBookManager,
                 private bookHelper: BooksAndBookHelperService,
                 private router: Router) {
