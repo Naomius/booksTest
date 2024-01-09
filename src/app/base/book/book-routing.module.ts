@@ -6,6 +6,10 @@ const routes: Routes = [
     {
         path: 'book',
         component: BookComponent
+    },
+    {
+        path: 'book/:id',
+        component: BookComponent
     }
 ];
 
@@ -13,4 +17,5 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
+
 export class BookRoutingModule { }

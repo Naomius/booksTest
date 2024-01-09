@@ -1,4 +1,5 @@
 import { Book } from "../../base/books/books.component";
+import {Sort} from "@angular/material/sort";
 
 
 export class BooksFacadeHelper {
@@ -21,7 +22,7 @@ export class BooksFacadeHelper {
         };
     }
 
-    public static sortBooksByEvent(books: Book[], searchStr: string, sortEvent): Book[] {
+    public static sortBooksByEvent(books: Book[], searchStr: string, sortEvent: Sort): Book[] {
         let filteredBooks = searchStr.trim() ?
             books.filter(book =>
                 book.title.toLocaleLowerCase().includes(searchStr.toLowerCase()) ||

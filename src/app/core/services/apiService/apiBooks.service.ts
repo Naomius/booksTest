@@ -11,7 +11,7 @@ export class ApiBooksService{
     }
 
 
-    public get Books(): Observable<IJson> {
+    public getBooks(): Observable<IJson> {
         return this.http.get<IJson>('/assets/books.json');
     }
 

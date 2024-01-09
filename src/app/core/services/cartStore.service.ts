@@ -8,12 +8,12 @@ import {BookId} from "../../base/books/books.component";
 })
 export class CartStoreService {
     private readonly booksInCartSubject$ = new BehaviorSubject<CartBook[]>([]);
-    private bookAddSubject$ = new Subject<BookId>();
-    private bookRemoveSubject$ = new Subject<number>();
+    private addBookToCart$ = new Subject<BookId>();
+    private removeBookFromCart$ = new Subject<number>();
 
     constructor() {
         merge(
-            this.bookAddSubject$.pipe(
+            this.addBookToCart$.pipe(
                 map(bookCounter => (currentBooks: CartBook[]) => {
                     const bookIndex = currentBooks.findIndex(b => b.id === bookCounter.id);
                     if (bookIndex !== -1) {
@@ -23,7 +23,7 @@ export class CartStoreService {
                     return [...currentBooks, { id: bookCounter.id, count: bookCounter.count }];
                 })
             ),
-            this.bookRemoveSubject$.pipe(
+            this.removeBookFromCart$.pipe(
                 map((bookId: number) => (currentBooks: CartBook[]) => currentBooks.filter(book => book.id !== bookId)),
             )
         ).pipe(
@@ -32,11 +32,11 @@ export class CartStoreService {
     }
 
     addToCart(cartBook: BookId): void {
-        this.bookAddSubject$.next(cartBook);
+        this.addBookToCart$.next(cartBook);
     }
 
     removeFromCart(bookId: number): void {
-        this.bookRemoveSubject$.next(bookId);
+        this.removeBookFromCart$.next(bookId);
     }
 
     get booksInCart$(): Observable<CartBook[]> {

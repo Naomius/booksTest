@@ -1,10 +1,10 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {BookFacadeService} from "../../core/services/facadesManagement/book.facade.service";
 import {BookFacadeToken} from "./tokens/BookFacadeToken";
 import {BooksAndBookHelperService} from "../../core/services/booksAndBookHelper.service";
-import {Observable, Subject} from "rxjs";
+import {map, Observable, Subject, switchMap, takeUntil, tap} from "rxjs";
 import {BookId} from "../books/books.component";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Params, Router} from "@angular/router";
 
 @Component({
     selector: 'app-book',
@@ -15,27 +15,39 @@ import {Router} from "@angular/router";
         {provide: BookFacadeToken, useExisting: BookFacadeService}
     ]
 })
-export class BookComponent implements OnInit{
-    book$: Observable<Book | null>;
-    public bookCounterChange$: Subject<BookId> = new Subject<BookId>;
+export class BookComponent implements OnInit, OnDestroy{
+    book$: Observable<Book>;
+    public bookCounterChange$: Subject<BookId> = new Subject<BookId>();
+    destroy$ = new Subject();
     constructor(@Inject(BookFacadeToken) private bookFacadeService: IBookManager,
                 private bookHelper: BooksAndBookHelperService,
-                private router: Router) {
-        this.book$ = this.bookHelper.selectedBookAction$;
+                private router: Router,
+                private activatedRoute: ActivatedRoute) {
+        // this.book$ = this.bookHelper.selectedBookAction$;
     }
 
     ngOnInit(): void {
-        this.book$.subscribe(book => {
-          if (!book) {
-              this.router.navigate(['/books'])
-          }
-        })
+        this.activatedRoute.params.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(params => {
+            const bookId = +params['id'];
+            this.bookFacadeService.getBookId(bookId);
+        });
+
+            this.book$ = this.bookFacadeService.Book
+
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next(true);
+        this.destroy$.complete();
     }
 
 }
 
 export interface IBookManager {
-    //methods from Facade
+    Book: Observable<Book>;
+    getBookId(id: number): void;
 }
 
 export interface Book {

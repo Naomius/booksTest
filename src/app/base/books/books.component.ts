@@ -2,12 +2,12 @@ import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angu
 import {
     BehaviorSubject, catchError,
     combineLatest, EMPTY,
-    filter, finalize,
+    filter,
     map,
     Observable,
     startWith,
     Subject,
-    takeUntil,
+    takeUntil, tap,
 } from "rxjs";
 
 import {Sort} from "@angular/material/sort";
@@ -41,7 +41,7 @@ export class BooksComponent implements OnInit, OnDestroy {
     public sortBooks$: Subject<Sort> = new Subject<Sort>();
     public error$: Subject<string> = new Subject<string>();
     public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    private unsubscribe$: Subject<void> = new Subject<void>();
+    private destroy$ = new Subject();
 
 
     constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager,
@@ -51,20 +51,21 @@ export class BooksComponent implements OnInit, OnDestroy {
 
 
     ngOnInit(): void {
-        // this.isLoading$.next(true);
-        this.books$ = this.mainFacadeService.getBooks().pipe(
+
+        this.books$ = this.mainFacadeService.Books.pipe(
+            tap(_ => this.isLoading$.next(true)),
             startWith([]),
             catchError(err => {
                 this.error$.next(err);
                 return EMPTY
             }),
-            finalize(() => this.isLoading$.next(false)),
-        );
+            tap(_ => this.isLoading$.next(false))
+        )
 
         // this.currentBooksInCart = this.mainFacadeService.bookInCart$;
 
         this.filteredAndSortedBooks$ = combineLatest([
-            this.books$.pipe(startWith([])),  //TODO поправить
+            this.books$,
             this.filterBooks$.pipe(startWith('')),
             this.sortBooks$.pipe(startWith(null))
         ]).pipe(
@@ -82,7 +83,7 @@ export class BooksComponent implements OnInit, OnDestroy {
     private initializeSideEffects(): void {
         this.bookCounterChange$.pipe(
             filter(bookToCart => bookToCart.count >= 0),
-            takeUntil(this.unsubscribe$)
+            takeUntil(this.destroy$)
         ).subscribe(bookToCart => {
             if (bookToCart.count > 0) {
                 console.log(`Заказали книгу по id ${bookToCart.id} в кол-ве ${bookToCart.count} шт.`);
@@ -92,7 +93,6 @@ export class BooksComponent implements OnInit, OnDestroy {
                 this.mainFacadeService.removeBooksFromCart(bookToCart.id)
             }
         });
-
     }
 
     selectBook(book: Book) {  // TODO убрать, получение через фасад книги(можем передать через шаблон id и занавигейтится в book, а в book facade принимаем и обрабатываем.
@@ -101,8 +101,8 @@ export class BooksComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.unsubscribe$.next();
-        this.unsubscribe$.complete();
+        this.destroy$.next(true);
+        this.destroy$.complete();
         this.error$.complete();
         this.isLoading$.complete();
     }
@@ -110,8 +110,7 @@ export class BooksComponent implements OnInit, OnDestroy {
 }
 
 export interface IBooksManager {
-    getBooks(): Observable<Book[]>,
-    // bookInCart$: Observable<CartBookDetails[]>,
+    Books: Observable<Book[]>,
     addBooksToCart(bookToCart: BookId): void,
     removeBooksFromCart(bookId: number): void,
 }
@@ -126,7 +125,7 @@ export interface Book {
     url: string,
 }
 
-export interface BookId {   // TODO поправить нейминг
+export interface BookId {
     id: number,
     count: number,
 }

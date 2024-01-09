@@ -1,15 +1,19 @@
 import {Injectable} from "@angular/core";
-import {BehaviorSubject, map, Observable} from "rxjs";
+import {map, Observable} from "rxjs";
 import {ApiBooksService} from "../apiService/apiBooks.service";
 import {IBooksManager} from "../../../base/books/books.component";
-import {CartBook, CartStoreService} from "../cartStore.service";
+import {CartStoreService} from "../cartStore.service";
+import {SharedBooksService} from "../booksService/shared-books.service";
 
 
 @Injectable()
 export class BooksFacadeService implements IBooksManager {
 
-    constructor(private apiBooksService: ApiBooksService,
+    books$: Observable<Book[]>;
+
+    constructor(private sharedBooksService: SharedBooksService,
                 private cartStoreService: CartStoreService) {
+        this.books$ = this.sharedBooksService.getBooks()
     }
 
     addBooksToCart(booksCounter: BooksCounter): void {
@@ -20,17 +24,8 @@ export class BooksFacadeService implements IBooksManager {
         this.cartStoreService.removeFromCart(bookId);
     }
 
-    getBooks(): Observable<Book[]> {   //TODO добавить геттер для получения книг
-        return this.apiBooksService.Books.pipe(
-            map(json => json.books.map(book => ({
-                ...book,
-                    price: Number(book.price.replace(/[^0-9\.-]+/g, ""))
-            })))
-        );
-    }
-
     get Books(): Observable<Book[]> {
-        return this.getBooks();
+        return this.books$;
     }
 
     //Получение текущено значения книг из корзины

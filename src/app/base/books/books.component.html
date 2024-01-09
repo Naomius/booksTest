@@ -15,7 +15,8 @@
                         >
                         <button class="btn btn-primary filter__clean-btn"
                                 [disabled]="!filterInput.value"
-                                (click)="cleanSearchInput()">Сбросить</button>
+                                (click)="cleanSearchInput()">Сбросить
+                        </button>
                 </div>
             </div>
 
@@ -47,7 +48,7 @@
                         <th mat-header-cell *matHeaderCellDef mat-sort-header="title">
                             Название
                         </th>
-                        <td class="filterForm" mat-cell *matCellDef="let book"><a (click)="selectBook(book)">{{book.title}}</a></td>
+                        <td class="filterForm" mat-cell *matCellDef="let book"><a [routerLink]="['/book', book.id]">{{book.title}}</a></td>
                     </ng-container>
                     <ng-container matColumnDef="price">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header="price">
