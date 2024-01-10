@@ -16,29 +16,32 @@ export class CartStoreService {
     updateCart(cartBook: CartBook): void {
         this.booksInCart$.pipe(
             map(books => {
-                const updatedBooks = books.slice();
-                const index = updatedBooks.findIndex(item => item.id === cartBook.id);
+                const cloneBooks = [...books];
+                const index = cloneBooks.findIndex(item => item.id === cartBook.id);
 
-                if (index === -1) {
-                    updatedBooks.push(cartBook);
-                } else {
-                    updatedBooks[index] = cartBook;
+                if (cartBook.count > 0) {
+                    if (index === -1) {
+                        cloneBooks.push(cartBook);
+                    } else {
+                        cloneBooks[index] = cartBook;
+                    }
+                } else if (cartBook.count === 0 && index !== -1) {
+                    cloneBooks.splice(index, 1);
                 }
 
-                return updatedBooks;
+                return cloneBooks;
             }),
             tap(updatedBooks => this.booksInCart$.next(updatedBooks))
         ).subscribe();
     }
 
-    get booksInCart(): Observable<CartBook[]> {
+    get BooksInCart(): Observable<CartBook[]> {
         return this.currentBooks$;
     }
 }
 
 export interface CartBook {
     id: number;
-
     count: number;
 }
 

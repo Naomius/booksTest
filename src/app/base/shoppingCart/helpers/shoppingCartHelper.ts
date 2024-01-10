@@ -1,16 +1,21 @@
 import {map, Observable} from "rxjs";
-import {CartBook} from "../../../core/services/cartStore.service";
+import {BookWithCount} from "../../../core/services/facadesManagement/shopping-cart.facade.service";
 
 export class ShoppingCartHelper {
-    // public static _calculateTotals(books$: Observable<CartBookDetails[]>) : Observable<{ count: number; price: number }> {
-    //     return books$.pipe(
-    //         map((books$: CartBookDetails[]) => books$.reduce((acc, book) => {
-    //                 return {
-    //                     count: acc.count + book.count,
-    //                     price: acc.price + book.price * book.count
-    //                 };
-    //             }, { count: 0, price: 0 }
-    //         ))
-    //     )
-    // }
+    public static calculateTotals(books$: Observable<BookWithCount[]>) : Observable<BookTotalPrice> {
+        return books$.pipe(
+            map((books$: BookWithCount[]) => books$.reduce((acc: BookTotalPrice, book: BookWithCount): BookTotalPrice => {
+                    return {
+                        count: acc.count + book.count,
+                        price: acc.price + book.price * book.count
+                    };
+                }, { count: 0, price: 0 }
+            ))
+        )
+    }
+}
+
+export interface BookTotalPrice {
+    count: number,
+    price: number,
 }

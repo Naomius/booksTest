@@ -1,9 +1,9 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {BookFacadeService} from "../../core/services/facadesManagement/book.facade.service";
 import {BookFacadeToken} from "./tokens/BookFacadeToken";
-import {Observable, Subject, takeUntil, tap} from "rxjs";
+import {Observable, Subject, takeUntil} from "rxjs";
 import {BookId} from "../books/books.component";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Params, Router} from "@angular/router";
 
 @Component({
     selector: 'app-book',
@@ -17,36 +17,29 @@ import {ActivatedRoute, Router} from "@angular/router";
 export class BookComponent implements OnInit, OnDestroy{
     book$: Observable<Book>;
     public bookCounterChange$: Subject<BookId> = new Subject<BookId>();
-    destroy$ = new Subject();
+    destroy$: Subject<boolean> = new Subject();
     constructor(@Inject(BookFacadeToken) private bookFacadeService: IBookManager,
                 private router: Router,
                 private activatedRoute: ActivatedRoute) {
     }
 
     ngOnInit(): void {
-            this.book$ = this.bookFacadeService.Book.pipe(
-                tap(book => {
-                    if (!book) {
-                        this.router.navigate(['/books'])
-                    }
-                })
-            )
+        this.book$ = this.bookFacadeService.Book;
 
-        this.getIdFromParams()
+        this.initializeSideEffects()
     }
 
-    getIdFromParams(): void {
+    initializeSideEffects(): void {
         this.activatedRoute.params.pipe(
             takeUntil(this.destroy$),
-        ).subscribe(params => {
-            const bookId = +params['id'];
+        ).subscribe((params: Params): void => {
+            const bookId: number = Number(params['id']);
             this.bookFacadeService.getBookId(bookId);
         });
     }
 
     ngOnDestroy(): void {
         this.destroy$.next(true);
-        this.destroy$.complete();
     }
 
 }

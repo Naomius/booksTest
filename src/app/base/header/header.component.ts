@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {CartStoreService} from "../../core/services/cartStore.service";
+import {CartBook, CartStoreService} from "../../core/services/cartStore.service";
 import { map, Observable} from "rxjs";
 
 @Component({
@@ -13,8 +13,8 @@ export class HeaderComponent {
     }
 
     getTotalAmount(): Observable<number> {
-        return this.cartService.booksInCart.pipe(
-            map(bookInCart => bookInCart.reduce((sum, book) => sum + (book.count || 0), 0))
+        return this.cartService.BooksInCart.pipe(
+            map((bookInCart: CartBook[]) => bookInCart.reduce((sum, book) => sum + (book.count || 0), 0))
         );
     }
 }

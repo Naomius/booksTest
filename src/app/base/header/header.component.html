@@ -18,10 +18,10 @@
                 </ul>
             </nav>
 
-            <div class="profile"  [matMenuTriggerFor]="menu"> <!--*ngIf="authUser"-->
-                <img class="profile__img" src="assets/images/enter.svg" alt="img">
-                <div class="profile__name">userName</div>
-            </div>
+<!--            <div class="profile"  [matMenuTriggerFor]="menu"> &lt;!&ndash;*ngIf="authUser"&ndash;&gt;-->
+<!--                <img class="profile__img" src="assets/images/enter.svg" alt="img">-->
+<!--                <div class="profile__name">userName</div>-->
+<!--            </div>-->
 
             <mat-menu #menu="matMenu">
                 <button  mat-menu-item> <!--(click)="doLogout()"-->
@@ -29,10 +29,10 @@
                 </button>
             </mat-menu>
 
-            <div class="profile"  routerLink="/login"> <!--*ngIf="!authUser"-->
-                <img class="profile__img" src="assets/images/enter.svg" alt="img">
-                <div class="profile__name">Авторизация</div>
-            </div>
+<!--            <div class="profile"  routerLink="/login"> &lt;!&ndash;*ngIf="!authUser"&ndash;&gt;-->
+<!--                <img class="profile__img" src="assets/images/enter.svg" alt="img">-->
+<!--                <div class="profile__name">Авторизация</div>-->
+<!--            </div>-->
 
         </div>
     </div>

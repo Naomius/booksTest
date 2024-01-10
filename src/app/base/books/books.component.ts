@@ -11,7 +11,7 @@ import {
 } from "rxjs";
 
 import {Sort} from "@angular/material/sort";
-import {BooksCounter, BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
+import {BooksId, BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
 import {BooksFacadeToken} from "./tokens/booksFacadeToken";
 import {BooksFacadeHelper} from "../../shared/helpers/booksFacadeHelper";
 import {CartBook} from "../../core/services/cartStore.service";
@@ -41,7 +41,7 @@ export class BooksComponent implements OnInit, OnDestroy {
     public sortBooks$: Subject<Sort> = new Subject<Sort>();
     public error$: Subject<string> = new Subject<string>();
     public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    private destroy$ = new Subject();
+    private destroy$: Subject<boolean> = new Subject();
 
 
     constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager,
@@ -88,7 +88,7 @@ export class BooksComponent implements OnInit, OnDestroy {
             if (bookToCart.count > 0) {
                 console.log(`Заказали книгу по id ${bookToCart.id} в кол-ве ${bookToCart.count} шт.`);
                 this.mainFacadeService.updateCart({ id: bookToCart.id, count: bookToCart.count });
-            } else if (bookToCart.count === 0) {
+            } else {
                 console.log(`Убрали из заказа книгу по id ${bookToCart.id}`);
                 this.mainFacadeService.updateCart({id: bookToCart.id, count: 0});
             }
@@ -97,16 +97,12 @@ export class BooksComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.destroy$.next(true);
-        this.destroy$.complete();
-        this.error$.complete();
-        this.isLoading$.complete();
     }
-
 }
 
 export interface IBooksManager {
     Books: Observable<Book[]>,
-    updateCart(booksCounter: BooksCounter): void,
+    updateCart(booksCounter: BooksId): void,
 }
 
 export interface Book {
@@ -122,10 +118,6 @@ export interface Book {
 export interface BookId {
     id: number,
     count: number,
-}
-
-export interface BookWithCount extends Book{
-    count: number
 }
 
 

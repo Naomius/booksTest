@@ -5,8 +5,7 @@ import {
 } from "../../core/services/facadesManagement/shopping-cart.facade.service";
 import {ShoppingCartFacadeToken} from "./tokens/shoppingCartFacadeToken";
 import {map, Observable, Subject} from "rxjs";
-import {CartBook} from "../../core/services/cartStore.service";
-import {ShoppingCartHelper} from "./helpers/shoppingCartHelper";
+import {BookTotalPrice, ShoppingCartHelper} from "./helpers/shoppingCartHelper";
 
 @Component({
     selector: 'app-shopping-cart',
@@ -22,40 +21,27 @@ export class ShoppingCartComponent implements OnInit{
     constructor(@Inject(ShoppingCartFacadeToken) private shoppingCartFacadeService: IShoppingCartManager) {
     }
 
-    public books$: Observable<CartBook[]>;
+    public books$: Observable<BookWithCount[]>;
     public totalBooksPrice$: Observable<number>;
     public totalBooksCount$: Observable<number>;
 
-    public bookCounterChange$: Subject<CartBooksCounter> = new Subject<CartBooksCounter>();
+    public bookCounterChange$: Subject<CartBooksId> = new Subject<CartBooksId>();
 
     ngOnInit(): void {
-        this.books$ = this.shoppingCartFacadeService.bookInCart$
+        this.books$ = this.shoppingCartFacadeService.BookInCart
 
-        // const totals$ = ShoppingCartHelper._calculateTotals(this.books$)
-        // this.totalBooksCount$ = totals$.pipe(map(totals => totals.count));
-        // this.totalBooksPrice$ = totals$.pipe(map(totals => totals.price));
+        const totals$: Observable<BookTotalPrice> = ShoppingCartHelper.calculateTotals(this.books$)
+        this.totalBooksCount$ = totals$.pipe(map((totals: BookTotalPrice)=> totals.count));
+        this.totalBooksPrice$ = totals$.pipe(map((totals: BookTotalPrice) => totals.price));
 
     }
-
 }
 
 export interface IShoppingCartManager {
-    bookInCart$: Observable<CartBook[]>;
-    addBooksToCart(bookWithCount: BookWithCount): void,
-    removeBooksFromCart(bookId: number): void;
+    BookInCart: Observable<BookWithCount[]>;
 }
 
-export interface CartBooks {
-    id: number,
-    title: string,
-    subtitle: string,
-    isbn13: string,
-    price: number,
-    image: string,
-    url: string,
-}
-
-export interface CartBooksCounter {
+export interface CartBooksId {
     id: number,
     count: number
 }

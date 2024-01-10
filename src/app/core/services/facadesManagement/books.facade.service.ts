@@ -1,6 +1,5 @@
 import {Injectable} from "@angular/core";
-import {map, Observable} from "rxjs";
-import {ApiBooksService} from "../apiService/apiBooks.service";
+import {Observable} from "rxjs";
 import {IBooksManager} from "../../../base/books/books.component";
 import {CartStoreService} from "../cartStore.service";
 import {SharedBooksService} from "../booksService/shared-books.service";
@@ -16,7 +15,7 @@ export class BooksFacadeService implements IBooksManager {
         this.books$ = this.sharedBooksService.getBooks()
     }
 
-    updateCart(booksCounter: BooksCounter): void {
+    updateCart(booksCounter: BooksId): void {
         this.cartStoreService.updateCart(booksCounter)
     }
 
@@ -42,7 +41,7 @@ export interface Book {
     url: string,
 }
 
-export interface BooksCounter {
+export interface BooksId {
     id: number,
     count: number,
 }
