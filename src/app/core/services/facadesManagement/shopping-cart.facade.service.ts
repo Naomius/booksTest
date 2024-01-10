@@ -17,7 +17,7 @@ export class ShoppingCartFacadeService implements IShoppingCartManager {
     }
 
     get bookInCart$(): Observable<CartBook[]> {
-      return this.cartStoreService.booksInCart$;
+      return this.cartStoreService.booksInCart;
     }
 
 }

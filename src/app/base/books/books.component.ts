@@ -11,7 +11,7 @@ import {
 } from "rxjs";
 
 import {Sort} from "@angular/material/sort";
-import {BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
+import {BooksCounter, BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
 import {BooksFacadeToken} from "./tokens/booksFacadeToken";
 import {BooksFacadeHelper} from "../../shared/helpers/booksFacadeHelper";
 import {CartBook} from "../../core/services/cartStore.service";
@@ -87,17 +87,12 @@ export class BooksComponent implements OnInit, OnDestroy {
         ).subscribe(bookToCart => {
             if (bookToCart.count > 0) {
                 console.log(`Заказали книгу по id ${bookToCart.id} в кол-ве ${bookToCart.count} шт.`);
-                this.mainFacadeService.addBooksToCart({ id: bookToCart.id, count: bookToCart.count });
+                this.mainFacadeService.updateCart({ id: bookToCart.id, count: bookToCart.count });
             } else if (bookToCart.count === 0) {
                 console.log(`Убрали из заказа книгу по id ${bookToCart.id}`);
-                this.mainFacadeService.removeBooksFromCart(bookToCart.id)
+                this.mainFacadeService.updateCart({id: bookToCart.id, count: 0});
             }
         });
-    }
-
-    selectBook(book: Book) {  // TODO убрать, получение через фасад книги(можем передать через шаблон id и занавигейтится в book, а в book facade принимаем и обрабатываем.
-        this.booksHelper.selectBook(book);
-        this.router.navigate(['/book'])
     }
 
     ngOnDestroy(): void {
@@ -111,8 +106,7 @@ export class BooksComponent implements OnInit, OnDestroy {
 
 export interface IBooksManager {
     Books: Observable<Book[]>,
-    addBooksToCart(bookToCart: BookId): void,
-    removeBooksFromCart(bookId: number): void,
+    updateCart(booksCounter: BooksCounter): void,
 }
 
 export interface Book {

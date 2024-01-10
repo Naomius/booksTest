@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {IBookManager} from "../../../base/book/book.component";
 import {SharedBooksService} from "../booksService/shared-books.service";
-import {BehaviorSubject, map, Observable, Subject, switchMap, tap} from "rxjs";
+import {BehaviorSubject, map, Observable, Subject, switchMap} from "rxjs";
 import {Book} from "./books.facade.service";
 
 @Injectable()

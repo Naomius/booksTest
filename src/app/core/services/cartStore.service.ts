@@ -1,50 +1,44 @@
 
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, Subject, merge, scan, Observable, map, tap} from 'rxjs';
-import {BookId} from "../../base/books/books.component";
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CartStoreService {
-    private readonly booksInCartSubject$ = new BehaviorSubject<CartBook[]>([]);
-    private addBookToCart$ = new Subject<BookId>();
-    private removeBookFromCart$ = new Subject<number>();
+    private readonly currentBooks$: Observable<CartBook[]>;
+    private readonly booksInCart$ = new BehaviorSubject<CartBook[]>([]);
 
     constructor() {
-        merge(
-            this.addBookToCart$.pipe(
-                map(bookCounter => (currentBooks: CartBook[]) => {
-                    const bookIndex = currentBooks.findIndex(b => b.id === bookCounter.id);
-                    if (bookIndex !== -1) {
-                        currentBooks[bookIndex] = { ...currentBooks[bookIndex], count: currentBooks[bookIndex].count + 1 };
-                        return [...currentBooks];
-                    }
-                    return [...currentBooks, { id: bookCounter.id, count: bookCounter.count }];
-                })
-            ),
-            this.removeBookFromCart$.pipe(
-                map((bookId: number) => (currentBooks: CartBook[]) => currentBooks.filter(book => book.id !== bookId)),
-            )
-        ).pipe(
-            scan((books: CartBook[], operation) => operation(books), []),
-        ).subscribe(this.booksInCartSubject$);
+        this.currentBooks$ = this.booksInCart$;
+    }
+    updateCart(cartBook: CartBook): void {
+        this.booksInCart$.pipe(
+            map(books => {
+                const updatedBooks = books.slice();
+                const index = updatedBooks.findIndex(item => item.id === cartBook.id);
+
+                if (index === -1) {
+                    updatedBooks.push(cartBook);
+                } else {
+                    updatedBooks[index] = cartBook;
+                }
+
+                return updatedBooks;
+            }),
+            tap(updatedBooks => this.booksInCart$.next(updatedBooks))
+        ).subscribe();
     }
 
-    addToCart(cartBook: BookId): void {
-        this.addBookToCart$.next(cartBook);
-    }
-
-    removeFromCart(bookId: number): void {
-        this.removeBookFromCart$.next(bookId);
-    }
-
-    get booksInCart$(): Observable<CartBook[]> {
-        return this.booksInCartSubject$;
+    get booksInCart(): Observable<CartBook[]> {
+        return this.currentBooks$;
     }
 }
 
 export interface CartBook {
     id: number;
+
     count: number;
 }
+

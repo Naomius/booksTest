@@ -1,10 +1,9 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {BookFacadeService} from "../../core/services/facadesManagement/book.facade.service";
 import {BookFacadeToken} from "./tokens/BookFacadeToken";
-import {BooksAndBookHelperService} from "../../core/services/booksAndBookHelper.service";
-import {map, Observable, Subject, switchMap, takeUntil, tap} from "rxjs";
+import {Observable, Subject, takeUntil, tap} from "rxjs";
 import {BookId} from "../books/books.component";
-import {ActivatedRoute, Params, Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
     selector: 'app-book',
@@ -20,22 +19,29 @@ export class BookComponent implements OnInit, OnDestroy{
     public bookCounterChange$: Subject<BookId> = new Subject<BookId>();
     destroy$ = new Subject();
     constructor(@Inject(BookFacadeToken) private bookFacadeService: IBookManager,
-                private bookHelper: BooksAndBookHelperService,
                 private router: Router,
                 private activatedRoute: ActivatedRoute) {
-        // this.book$ = this.bookHelper.selectedBookAction$;
     }
 
     ngOnInit(): void {
+            this.book$ = this.bookFacadeService.Book.pipe(
+                tap(book => {
+                    if (!book) {
+                        this.router.navigate(['/books'])
+                    }
+                })
+            )
+
+        this.getIdFromParams()
+    }
+
+    getIdFromParams(): void {
         this.activatedRoute.params.pipe(
-            takeUntil(this.destroy$)
+            takeUntil(this.destroy$),
         ).subscribe(params => {
             const bookId = +params['id'];
             this.bookFacadeService.getBookId(bookId);
         });
-
-            this.book$ = this.bookFacadeService.Book
-
     }
 
     ngOnDestroy(): void {

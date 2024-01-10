@@ -13,7 +13,7 @@ export class HeaderComponent {
     }
 
     getTotalAmount(): Observable<number> {
-        return this.cartService.booksInCart$.pipe(
+        return this.cartService.booksInCart.pipe(
             map(bookInCart => bookInCart.reduce((sum, book) => sum + (book.count || 0), 0))
         );
     }

@@ -16,13 +16,10 @@ export class BooksFacadeService implements IBooksManager {
         this.books$ = this.sharedBooksService.getBooks()
     }
 
-    addBooksToCart(booksCounter: BooksCounter): void {
-        this.cartStoreService.addToCart(booksCounter)
+    updateCart(booksCounter: BooksCounter): void {
+        this.cartStoreService.updateCart(booksCounter)
     }
 
-    removeBooksFromCart(bookId: number): void {
-        this.cartStoreService.removeFromCart(bookId);
-    }
 
     get Books(): Observable<Book[]> {
         return this.books$;
