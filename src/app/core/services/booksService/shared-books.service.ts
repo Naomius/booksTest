@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {map, Observable} from "rxjs";
+import {BehaviorSubject, map, Observable} from "rxjs";
 import {Book} from "../facadesManagement/books.facade.service";
 import {ApiBooksService} from "../apiService/apiBooks.service";
 
@@ -9,6 +8,7 @@ import {ApiBooksService} from "../apiService/apiBooks.service";
 })
 export class SharedBooksService {
 
+    private readonly cartBooks$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   constructor(private apiBooksService: ApiBooksService) { }
 
     getBooks(): Observable<Book[]> {
@@ -18,6 +18,14 @@ export class SharedBooksService {
                 price: Number(book.price.replace(/[^0-9\.-]+/g, ""))
             })))
         );
+    }
+
+    updateCounterValue(newValue: number): void {
+        this.cartBooks$.next(newValue);
+    }
+
+    get counterValue(): BehaviorSubject<number> {
+        return this.cartBooks$;
     }
 
 

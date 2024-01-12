@@ -1,6 +1,6 @@
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, Observable, share, shareReplay, take} from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 @Injectable({
@@ -15,6 +15,7 @@ export class CartStoreService {
     }
     updateCart(cartBook: CartBook): void {
         this.booksInCart$.pipe(
+            take(1),
             map(books => {
                 const cloneBooks = [...books];
                 const index = cloneBooks.findIndex(item => item.id === cartBook.id);

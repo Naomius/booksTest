@@ -17,7 +17,7 @@
                 {{ book.price | currency }}
             </div>
             <div>
-                <div class="books-buttons">
+                <div class="books-buttons" *ngIf="!(book.count === 0)">
                    <div class="counter">
                        <app-counter [initialText]="'Купить'"
                                     (counterChange)="bookCounterChange$.next({id: book.id, count: $event})">

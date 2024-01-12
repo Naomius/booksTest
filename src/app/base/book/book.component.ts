@@ -1,9 +1,10 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {BookFacadeService} from "../../core/services/facadesManagement/book.facade.service";
 import {BookFacadeToken} from "./tokens/BookFacadeToken";
-import {Observable, Subject, takeUntil} from "rxjs";
+import {filter, Observable, Subject, take, takeUntil, tap} from "rxjs";
 import {BookId} from "../books/books.component";
 import {ActivatedRoute, Params, Router} from "@angular/router";
+import {BooksId} from "../../core/services/facadesManagement/books.facade.service";
 
 @Component({
     selector: 'app-book',
@@ -19,14 +20,14 @@ export class BookComponent implements OnInit, OnDestroy{
     public bookCounterChange$: Subject<BookId> = new Subject<BookId>();
     destroy$: Subject<boolean> = new Subject();
     constructor(@Inject(BookFacadeToken) private bookFacadeService: IBookManager,
-                private router: Router,
                 private activatedRoute: ActivatedRoute) {
     }
 
     ngOnInit(): void {
         this.book$ = this.bookFacadeService.Book;
 
-        this.initializeSideEffects()
+        this.initializeSideEffects();
+        this.initializeSideEffectsBooksCounter();
     }
 
     initializeSideEffects(): void {
@@ -38,6 +39,16 @@ export class BookComponent implements OnInit, OnDestroy{
         });
     }
 
+    initializeSideEffectsBooksCounter(): void {
+        this.bookCounterChange$.pipe(
+            filter(bookToCart => bookToCart.count >= 0),
+            takeUntil(this.destroy$)
+        ).subscribe(bookToCart => {
+            const count = bookToCart.count > 0 ? bookToCart.count : 0;
+            this.bookFacadeService.updateCart({id: bookToCart.id, count})
+        })
+    }
+
     ngOnDestroy(): void {
         this.destroy$.next(true);
     }
@@ -47,6 +58,7 @@ export class BookComponent implements OnInit, OnDestroy{
 export interface IBookManager {
     Book: Observable<Book>;
     getBookId(id: number): void;
+    updateCart(booksId: BooksId): void;
 }
 
 export interface Book {

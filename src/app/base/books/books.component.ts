@@ -42,6 +42,7 @@ export class BooksComponent implements OnInit, OnDestroy {
     public error$: Subject<string> = new Subject<string>();
     public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     private destroy$: Subject<boolean> = new Subject();
+    counterValue$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
 
     constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager,
@@ -51,7 +52,6 @@ export class BooksComponent implements OnInit, OnDestroy {
 
 
     ngOnInit(): void {
-
         this.books$ = this.mainFacadeService.Books.pipe(
             tap(_ => this.isLoading$.next(true)),
             startWith([]),
@@ -59,8 +59,9 @@ export class BooksComponent implements OnInit, OnDestroy {
                 this.error$.next(err);
                 return EMPTY
             }),
-            tap(_ => this.isLoading$.next(false))
+            tap(_ => this.isLoading$.next(false)),
         )
+
 
         // this.currentBooksInCart = this.mainFacadeService.bookInCart$;
 
@@ -75,6 +76,10 @@ export class BooksComponent implements OnInit, OnDestroy {
         this.initializeSideEffects();
     }
 
+    onCounterChange(newValue: number) {
+        this.counterValue$.next(newValue);
+    }
+
     public cleanSearchInput(): void {
         this.filterBooks$.next('');
         this.filterInput.nativeElement.value = '';
@@ -85,13 +90,19 @@ export class BooksComponent implements OnInit, OnDestroy {
             filter(bookToCart => bookToCart.count >= 0),
             takeUntil(this.destroy$)
         ).subscribe(bookToCart => {
-            if (bookToCart.count > 0) {
-                console.log(`Заказали книгу по id ${bookToCart.id} в кол-ве ${bookToCart.count} шт.`);
-                this.mainFacadeService.updateCart({ id: bookToCart.id, count: bookToCart.count });
-            } else {
-                console.log(`Убрали из заказа книгу по id ${bookToCart.id}`);
-                this.mainFacadeService.updateCart({id: bookToCart.id, count: 0});
-            }
+            const count = bookToCart.count > 0 ? bookToCart.count : 0;
+            const message = count > 0 ? `Заказали книгу по id ${bookToCart.id} в кол-ве ${count} шт` :
+                `Убрали из заказа книгу по id ${bookToCart.id}`;
+            console.log(message);
+            this.onCounterChange(count)
+            this.mainFacadeService.updateCart({id: bookToCart.id, count})
+            // if (bookToCart.count > 0) {
+            //     console.log(`Заказали книгу по id ${bookToCart.id} в кол-ве ${bookToCart.count} шт.`);
+            //     this.mainFacadeService.updateCart({ id: bookToCart.id, count: bookToCart.count });
+            // } else {
+            //     console.log(`Убрали из заказа книгу по id ${bookToCart.id}`);
+            //     this.mainFacadeService.updateCart({id: bookToCart.id, count: 0});
+            // }
         });
     }
 

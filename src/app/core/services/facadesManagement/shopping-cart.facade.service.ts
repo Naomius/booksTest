@@ -1,49 +1,44 @@
 import { Injectable } from '@angular/core';
 import {IShoppingCartManager} from "../../../base/shoppingCart/shopping-cart.component";
-import {BehaviorSubject, map, Observable, switchMap} from "rxjs";
+import {BehaviorSubject, delay, map, Observable, ReplaySubject, startWith, tap, withLatestFrom} from "rxjs";
 import {CartBook, CartStoreService} from "../cartStore.service";
 import {SharedBooksService} from "../booksService/shared-books.service";
+import {BooksId} from "./books.facade.service";
 
 
 @Injectable()
 export class ShoppingCartFacadeService implements IShoppingCartManager {
 
-    private readonly currentBooks$: Observable<BookWithCount[]>;
-    private readonly getBookById$: BehaviorSubject<CartBook[]> = new BehaviorSubject<CartBook[]>([])
+    private readonly booksInCart$: Observable<BookWithCount[]>;
   constructor(private cartStoreService: CartStoreService,
               private sharedBooksService: SharedBooksService) {
 
-        this.cartStoreService.BooksInCart.subscribe((booksInCart: CartBook[]): void => {
-            this.getBookById$.next(booksInCart)
-        })
-
-      this.currentBooks$ = this.getBookById$.pipe(
-         switchMap((books: CartBook[]) => {
-             return this.sharedBooksService.getBooks().pipe(
-                 map((allBooks: Book[]) => {
-                     return books.map((bookInCart: CartBook) => {
-                         const currentBook: Book = allBooks.find((book: Book): boolean => book.id === bookInCart.id);
-                         return {
-                             id: currentBook.id,
-                             title: currentBook.title,
-                             subtitle: currentBook.subtitle,
-                             isbn13: currentBook.isbn13,
-                             price: currentBook.price,
-                             image: currentBook.image,
-                             url: currentBook.url,
-                             count: bookInCart.count
-                         }
-                     })
-                 })
-             )
-         }),
+      this.booksInCart$ = this.cartStoreService.BooksInCart.pipe(
+          withLatestFrom(this.sharedBooksService.getBooks()),
+          map(([cartBooks, books]) => {
+              return cartBooks.map((bookInCart: CartBook) => {
+                  const currentBook: Book = books.find(book => book.id === bookInCart.id);
+                  return {
+                      id: currentBook.id,
+                      title: currentBook.title,
+                      subtitle: currentBook.subtitle,
+                      isbn13: currentBook.isbn13,
+                      price: currentBook.price,
+                      image: currentBook.image,
+                      url: currentBook.url,
+                      count: bookInCart.count
+                  }
+              })
+          })
       )
-
   }
 
+    updateCart(booksId: BooksId): void {
+      this.cartStoreService.updateCart(booksId);
+    }
 
-    get BookInCart(): Observable<BookWithCount[]> {
-      return this.currentBooks$;
+    get BooksInCart(): Observable<BookWithCount[]> {
+      return this.booksInCart$;
     }
 
 }

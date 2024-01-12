@@ -69,8 +69,8 @@
                         <td mat-cell *matCellDef="let book">
                             <div class="books-buttons">
                                 <div class="counter">
-                                    <app-counter [initialText]="'Купить'"
-                                        (counterChange)="bookCounterChange$.next({id: book.id, count: $event})">
+                                    <app-counter [initialText]="'Купить'" [counterValue$]="counterValue$"
+                                                 (counterChange)="bookCounterChange$.next({ id: book.id, count: $event })">
                                     </app-counter>
                                 </div>
                             </div>

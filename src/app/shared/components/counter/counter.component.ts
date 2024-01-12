@@ -1,7 +1,8 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from "@angular/common";
-import {map, merge, Observable, scan, share, shareReplay, startWith, Subject} from "rxjs";
+import {map, merge, Observable, scan, share, shareReplay, startWith, Subject, tap} from "rxjs";
 import {MatButtonModule} from "@angular/material/button";
+import {SharedBooksService} from "../../../core/services/booksService/shared-books.service";
 
 @Component({
     standalone: true,
@@ -12,6 +13,7 @@ import {MatButtonModule} from "@angular/material/button";
 })
 export class CounterComponent {
     @Input() initialText: string;
+    @Input() counterValue$: Observable<number>;
     @Output() counterChange: EventEmitter<number> = new EventEmitter<number>();
 
     currentValue$: Observable<string>;
@@ -21,7 +23,10 @@ export class CounterComponent {
     manualChange$: Subject<string> = new Subject<string>();
     buttonClick$: Subject<void> = new Subject<void>();
 
-    constructor() {
+    constructor(private shareService: SharedBooksService) {
+        if (this.counterValue$) {
+            this.counterValue$.subscribe(console.log);
+        }
         this.currentValue$ = merge(
             this.rightArrowClick$.pipe(map(_ => ({action: 'plus', payload: null}))),
             this.leftArrowClick$.pipe(map(_ => ({action: 'minus', payload: null}))),
