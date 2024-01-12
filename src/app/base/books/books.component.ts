@@ -50,7 +50,6 @@ export class BooksComponent implements OnInit, OnDestroy {
                 private booksHelper: BooksAndBookHelperService) {
     }
 
-
     ngOnInit(): void {
         this.books$ = this.mainFacadeService.Books.pipe(
             tap(_ => this.isLoading$.next(true)),
@@ -96,13 +95,6 @@ export class BooksComponent implements OnInit, OnDestroy {
             console.log(message);
             this.onCounterChange(count)
             this.mainFacadeService.updateCart({id: bookToCart.id, count})
-            // if (bookToCart.count > 0) {
-            //     console.log(`Заказали книгу по id ${bookToCart.id} в кол-ве ${bookToCart.count} шт.`);
-            //     this.mainFacadeService.updateCart({ id: bookToCart.id, count: bookToCart.count });
-            // } else {
-            //     console.log(`Убрали из заказа книгу по id ${bookToCart.id}`);
-            //     this.mainFacadeService.updateCart({id: bookToCart.id, count: 0});
-            // }
         });
     }
 

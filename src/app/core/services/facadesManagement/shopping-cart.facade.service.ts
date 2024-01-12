@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import {IShoppingCartManager} from "../../../base/shoppingCart/shopping-cart.component";
-import {BehaviorSubject, delay, map, Observable, ReplaySubject, startWith, tap, withLatestFrom} from "rxjs";
+import {
+    combineLatest,
+    delay,
+    map,
+    Observable, startWith, tap,
+    withLatestFrom
+} from "rxjs";
 import {CartBook, CartStoreService} from "../cartStore.service";
 import {SharedBooksService} from "../booksService/shared-books.service";
 import {BooksId} from "./books.facade.service";
@@ -14,7 +20,12 @@ export class ShoppingCartFacadeService implements IShoppingCartManager {
               private sharedBooksService: SharedBooksService) {
 
       this.booksInCart$ = this.cartStoreService.BooksInCart.pipe(
-          withLatestFrom(this.sharedBooksService.getBooks()),
+          // delay(100),
+          tap(b => console.log(b)),
+          withLatestFrom(this.sharedBooksService.getBooks().pipe(
+              tap(b => console.log(b)),
+              startWith([])
+          )),
           map(([cartBooks, books]) => {
               return cartBooks.map((bookInCart: CartBook) => {
                   const currentBook: Book = books.find(book => book.id === bookInCart.id);
@@ -31,6 +42,26 @@ export class ShoppingCartFacadeService implements IShoppingCartManager {
               })
           })
       )
+      // this.booksInCart$ = combineLatest([
+      //     this.cartStoreService.BooksInCart,
+      //     this.sharedBooksService.getBooks()
+      // ]).pipe(
+      //     map(([cartBooks, books]) => {
+      //         return cartBooks.map((bookInCart: CartBook) => {
+      //             const currentBook: Book = books.find(book => book.id === bookInCart.id);
+      //             return {
+      //                 id: currentBook.id,
+      //                 title: currentBook.title,
+      //                 subtitle: currentBook.subtitle,
+      //                 isbn13: currentBook.isbn13,
+      //                 price: currentBook.price,
+      //                 image: currentBook.image,
+      //                 url: currentBook.url,
+      //                 count: bookInCart.count
+      //             }
+      //         })
+      //     })
+      // )
   }
 
     updateCart(booksId: BooksId): void {

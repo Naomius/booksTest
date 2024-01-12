@@ -1,6 +1,6 @@
 
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, Observable, share, shareReplay, take} from 'rxjs';
+import {BehaviorSubject, Observable, take} from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 @Injectable({

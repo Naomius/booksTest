@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, map, Observable} from "rxjs";
+import {BehaviorSubject, map, Observable, of, switchMap, tap} from "rxjs";
 import {Book} from "../facadesManagement/books.facade.service";
 import {ApiBooksService} from "../apiService/apiBooks.service";
 
@@ -8,25 +8,24 @@ import {ApiBooksService} from "../apiService/apiBooks.service";
 })
 export class SharedBooksService {
 
-    private readonly cartBooks$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+    private booksCache$: BehaviorSubject<Book[] | null> = new BehaviorSubject<Book[] | null>(null);
   constructor(private apiBooksService: ApiBooksService) { }
 
-    getBooks(): Observable<Book[]> {
+    private getBooksFromApiService(): Observable<Book[]> {
         return this.apiBooksService.getBooks().pipe(
             map(json => json.books.map(book => ({
                 ...book,
                 price: Number(book.price.replace(/[^0-9\.-]+/g, ""))
-            })))
+            }))),
+            tap(books => this.booksCache$.next(books))
         );
     }
 
-    updateCounterValue(newValue: number): void {
-        this.cartBooks$.next(newValue);
+    getBooks(): Observable<Book[]> {
+      return this.booksCache$.pipe(
+          switchMap(books => books === null ? this.getBooksFromApiService() : of(books))
+      )
     }
-
-    get counterValue(): BehaviorSubject<number> {
-        return this.cartBooks$;
-    }
-
 
 }
+
