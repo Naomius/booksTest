@@ -7,16 +7,13 @@ import {
     Observable,
     startWith,
     Subject,
-    takeUntil, tap,
+    takeUntil, tap, withLatestFrom,
 } from "rxjs";
 
 import {Sort} from "@angular/material/sort";
 import {BooksId, BooksFacadeService} from "../../core/services/facadesManagement/books.facade.service";
 import {BooksFacadeToken} from "./tokens/booksFacadeToken";
 import {BooksFacadeHelper} from "../../shared/helpers/booksFacadeHelper";
-import {CartBook} from "../../core/services/cartStore.service";
-import {Router} from "@angular/router";
-import {BooksAndBookHelperService} from "../../core/services/booksAndBookHelper.service";
 
 @Component({
     selector: 'app-books',
@@ -32,9 +29,10 @@ export class BooksComponent implements OnInit, OnDestroy {
 
     displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
 
-    public books$!: Observable<Book[]>;
-    public currentBooksInCart: Observable<CartBook[]>; //для актуальных данных с корзины
-    public filteredAndSortedBooks$: Observable<Book[]>;
+    private books$!: Observable<Book[]>;
+    private booksInCart$!: Observable<BookId[]>;
+    private booksAndItsCountInCart$!: Observable<BookAndCount[]>;
+    public filteredAndSortedBooks$: Observable<BookAndCount[]>;
 
     public bookCounterChange$: Subject<BookId> = new Subject<BookId>;
     public filterBooks$: Subject<string> = new Subject<string>();
@@ -42,15 +40,12 @@ export class BooksComponent implements OnInit, OnDestroy {
     public error$: Subject<string> = new Subject<string>();
     public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     private destroy$: Subject<boolean> = new Subject();
-    counterValue$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
-
-    constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager,
-                private router: Router,
-                private booksHelper: BooksAndBookHelperService) {
-    }
+    constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager) {}
 
     ngOnInit(): void {
+        this.booksInCart$ = this.mainFacadeService.BookInCart;
+
         this.books$ = this.mainFacadeService.Books.pipe(
             tap(_ => this.isLoading$.next(true)),
             startWith([]),
@@ -59,24 +54,40 @@ export class BooksComponent implements OnInit, OnDestroy {
                 return EMPTY
             }),
             tap(_ => this.isLoading$.next(false)),
-        )
+        );
 
-
-        // this.currentBooksInCart = this.mainFacadeService.bookInCart$;
+        this.booksAndItsCountInCart$ = this.books$.pipe(
+            withLatestFrom(this.booksInCart$),
+            map(([books, booksInCart]) => {
+                return books.map(book => {
+                    const bookCountInCart: number = booksInCart
+                        .find(bookCount => bookCount.id === book.id)?.count || 0;
+                    return {
+                        book: book,
+                        count: bookCountInCart
+                    }
+                })
+            })
+        );
 
         this.filteredAndSortedBooks$ = combineLatest([
-            this.books$,
+            this.booksAndItsCountInCart$,
             this.filterBooks$.pipe(startWith('')),
             this.sortBooks$.pipe(startWith(null))
         ]).pipe(
-            map(([books, searchStr, sortEvent]) => BooksFacadeHelper.sortBooksByEvent(books, searchStr, sortEvent)),
-        );
+            map(([booksAndCount, searchStr, sortEvent]) => {
+                    let filteredBooks: BookAndCount[] = searchStr.trim() ?
+                        booksAndCount.filter(({book}) =>
+                            book.title.toLowerCase().includes(searchStr.toLowerCase()) ||
+                            book.subtitle.toLowerCase().includes(searchStr.toLowerCase())
+                        ) :
+                        [...booksAndCount];
+
+                    return BooksFacadeHelper.sortBooks(filteredBooks, sortEvent);
+                }
+            ));
 
         this.initializeSideEffects();
-    }
-
-    onCounterChange(newValue: number) {
-        this.counterValue$.next(newValue);
     }
 
     public cleanSearchInput(): void {
@@ -86,14 +97,13 @@ export class BooksComponent implements OnInit, OnDestroy {
 
     private initializeSideEffects(): void {
         this.bookCounterChange$.pipe(
-            filter(bookToCart => bookToCart.count >= 0),
+            filter(bookToCart => bookToCart.count > 0),
             takeUntil(this.destroy$)
         ).subscribe(bookToCart => {
             const count = bookToCart.count > 0 ? bookToCart.count : 0;
             const message = count > 0 ? `Заказали книгу по id ${bookToCart.id} в кол-ве ${count} шт` :
                 `Убрали из заказа книгу по id ${bookToCart.id}`;
             console.log(message);
-            this.onCounterChange(count)
             this.mainFacadeService.updateCart({id: bookToCart.id, count})
         });
     }
@@ -104,23 +114,28 @@ export class BooksComponent implements OnInit, OnDestroy {
 }
 
 export interface IBooksManager {
-    Books: Observable<Book[]>,
-    updateCart(booksCounter: BooksId): void,
+    Books: Observable<Book[]>;
+    BookInCart: Observable<BookId[]>;
+    updateCart(booksCounter: BooksId): void;
 }
 
 export interface Book {
-    id: number,
-    title: string,
-    subtitle: string,
-    isbn13: string,
-    price: number,
-    image: string,
-    url: string,
+    id: number;
+    title: string;
+    subtitle: string;
+    isbn13: string;
+    price: number;
+    image: string;
+    url: string;
+}
+export interface BookAndCount {
+    book: Book;
+    count: number;
 }
 
 export interface BookId {
-    id: number,
-    count: number,
+    id: number;
+    count: number;
 }
 
 

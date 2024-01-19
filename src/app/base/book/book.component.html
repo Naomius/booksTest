@@ -1,19 +1,20 @@
-<div class="container" *ngIf="book$ | async as book; else noBookSelected">
+<div class="container" *ngIf="booksAndCountInCart$ | async as bookAndCount; else noBookSelected">
     <div class="book-items">
         <div class="book-item__image">
-            <img src="{{book.image}}" alt="book">
+            <img src="{{bookAndCount.book.image}}" alt="book">
         </div>
         <div class="book-item__about">
-            <h2 class="book-item__title">{{book.title}}</h2>
-            <div class="book-item__text">{{book.subtitle}}</div>
-            <div class="book-item__price">Цена: {{book.price | currency}}</div>
+            <h2 class="book-item__title">{{bookAndCount.book.title}}</h2>
+            <div class="book-item__text">{{bookAndCount.book.subtitle}}</div>
+            <div class="book-item__price">Цена: {{bookAndCount.book.price | currency}}</div>
             <div class="book-item__button">
                 <button routerLink="/books" mat-raised-button color="primary">На страницу книги</button>
             </div>
             <div class="books-buttons">
                 <div class="counter">
                     <app-counter [initialText]="'Купить'"
-                                 (counterChange)="bookCounterChange$.next({id: book.id, count: $event})">
+                                 [counterValue]="bookAndCount.count"
+                                 (counterChange)="bookCounterChange$.next({id: bookAndCount.book.id, count: $event})">
                     </app-counter>
                 </div>
             </div>

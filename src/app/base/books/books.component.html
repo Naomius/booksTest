@@ -11,8 +11,7 @@
                 <div class="books-filter">
                         <label class="filter_title" for="filter_input"></label>
                         <input #filterInput Autofocus type="text" class="filter_input input" id="filter_input" placeholder="Введите название"
-                               (keyup)="filterBooks$.next(filterInput.value)"
-                        >
+                               (keyup)="filterBooks$.next(filterInput.value)">
                         <button class="btn btn-primary filter__clean-btn"
                                 [disabled]="!filterInput.value"
                                 (click)="cleanSearchInput()">Сбросить
@@ -30,8 +29,7 @@
                        matSortDisableClear
                        matSortDirection="asc"
                        [dataSource]="filteredAndSortedBooks$ | async"
-                       (matSortChange)="sortBooks$.next($event)"
-                       >
+                       (matSortChange)="sortBooks$.next($event)">
                     <ng-container matColumnDef="position">
                         <th mat-header-cell *matHeaderCellDef>
                             #
@@ -42,35 +40,36 @@
                         <th class="table-image" mat-header-cell *matHeaderCellDef>
                             Картинка
                         </th>
-                        <td mat-cell *matCellDef="let book"><img src="{{book.image}}" alt="image"></td>
+                        <td mat-cell *matCellDef="let bookAndCount"><img src="{{bookAndCount.book.image}}" alt="image"></td>
                     </ng-container>
                     <ng-container matColumnDef="name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header="title">
                             Название
                         </th>
-                        <td class="filterForm" mat-cell *matCellDef="let book"><a [routerLink]="['/book', book.id]">{{book.title}}</a></td>
+                        <td class="filterForm" mat-cell *matCellDef="let bookAndCount"><a [routerLink]="['/book', bookAndCount.book.id]">{{bookAndCount.book.title}}</a></td>
                     </ng-container>
                     <ng-container matColumnDef="price">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header="price">
                             Цена
                         </th>
-                        <td mat-cell *matCellDef="let book"> {{book.price | currency}} </td>
+                        <td mat-cell *matCellDef="let bookAndCount"> {{bookAndCount.book.price | currency}} </td>
                     </ng-container>
                     <ng-container matColumnDef="description">
                         <th mat-header-cell *matHeaderCellDef>
                             Описание
                         </th>
-                        <td mat-cell *matCellDef="let book"> {{book.subtitle}} </td>
+                        <td mat-cell *matCellDef="let bookAndCount"> {{bookAndCount.book.subtitle}} </td>
                     </ng-container>
                     <ng-container matColumnDef="buy">
                         <th mat-header-cell *matHeaderCellDef>
                             Приобрести
                         </th>
-                        <td mat-cell *matCellDef="let book">
+                        <td mat-cell *matCellDef="let bookAndCount">
                             <div class="books-buttons">
                                 <div class="counter">
-                                    <app-counter [initialText]="'Купить'" [counterValue$]="counterValue$"
-                                                 (counterChange)="bookCounterChange$.next({ id: book.id, count: $event })">
+                                    <app-counter [initialText]="'Купить'"
+                                                 [counterValue]="bookAndCount.count"
+                                                 (counterChange)="bookCounterChange$.next({ id: bookAndCount.book.id, count: $event })">
                                     </app-counter>
                                 </div>
                             </div>

@@ -1,10 +1,9 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {BookFacadeService} from "../../core/services/facadesManagement/book.facade.service";
 import {BookFacadeToken} from "./tokens/BookFacadeToken";
-import {filter, Observable, Subject, take, takeUntil, tap} from "rxjs";
+import {filter, map, Observable, Subject, takeUntil, withLatestFrom} from "rxjs";
 import {BookId} from "../books/books.component";
-import {ActivatedRoute, Params, Router} from "@angular/router";
-import {BooksId} from "../../core/services/facadesManagement/books.facade.service";
+import {ActivatedRoute, Params} from "@angular/router";
 
 @Component({
     selector: 'app-book',
@@ -16,18 +15,35 @@ import {BooksId} from "../../core/services/facadesManagement/books.facade.servic
     ]
 })
 export class BookComponent implements OnInit, OnDestroy{
-    book$: Observable<Book>;
+
+    public book$: Observable<Book>;
+    private booksInCart$: Observable<BookId[]>;
+    public booksAndCountInCart$: Observable<BookAndCount>;
+
     public bookCounterChange$: Subject<BookId> = new Subject<BookId>();
-    destroy$: Subject<boolean> = new Subject();
+    private destroy$: Subject<boolean> = new Subject();
     constructor(@Inject(BookFacadeToken) private bookFacadeService: IBookManager,
                 private activatedRoute: ActivatedRoute) {
     }
 
     ngOnInit(): void {
         this.book$ = this.bookFacadeService.Book;
+        this.booksInCart$ = this.bookFacadeService.BookInCart;
+
+        this.booksAndCountInCart$ = this.book$.pipe(
+            withLatestFrom(this.booksInCart$),
+            map(([book, booksInCart]) => {
+                const bookCountInCart: number = booksInCart
+                    .find(bookCount => bookCount.id === book.id)?.count || 0;
+                return {
+                    book: book,
+                    count: bookCountInCart
+                }
+            })
+        );
 
         this.initializeSideEffects();
-        this.initializeSideEffectsBooksCounter();
+        this.initializeBookCounterSideEffects();
     }
 
     initializeSideEffects(): void {
@@ -39,7 +55,7 @@ export class BookComponent implements OnInit, OnDestroy{
         });
     }
 
-    initializeSideEffectsBooksCounter(): void {
+    initializeBookCounterSideEffects(): void {
         this.bookCounterChange$.pipe(
             filter(bookToCart => bookToCart.count >= 0),
             takeUntil(this.destroy$)
@@ -57,16 +73,22 @@ export class BookComponent implements OnInit, OnDestroy{
 
 export interface IBookManager {
     Book: Observable<Book>;
+    BookInCart: Observable<BookId[]>;
     getBookId(id: number): void;
-    updateCart(booksId: BooksId): void;
+    updateCart(bookId: BookId): void;
 }
 
 export interface Book {
-    id: number,
-    title: string,
-    subtitle: string,
-    isbn13: string,
-    price: number,
-    image: string,
-    url: string,
+    id: number;
+    title: string;
+    subtitle: string;
+    isbn13: string;
+    price: number;
+    image: string;
+    url: string;
+}
+
+interface BookAndCount {
+    book: Book;
+    count: number;
 }

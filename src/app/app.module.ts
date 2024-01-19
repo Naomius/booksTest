@@ -4,7 +4,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {SharedModule} from "./shared/shared.module";
-import {BooksModule} from "./base/books/books.module";
 import {BaseComponent} from "./base/base.component";
 import {BaseModule} from "./base/base.module";
 import {HttpClientModule} from "@angular/common/http";

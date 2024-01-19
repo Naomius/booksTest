@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
-import {IBooksManager} from "../../../base/books/books.component";
+import {BookId, IBooksManager} from "../../../base/books/books.component";
 import {CartStoreService} from "../cartStore.service";
 import {SharedBooksService} from "../booksService/shared-books.service";
 
@@ -8,40 +8,40 @@ import {SharedBooksService} from "../booksService/shared-books.service";
 @Injectable()
 export class BooksFacadeService implements IBooksManager {
 
-    books$: Observable<Book[]>;
+    private readonly books$: Observable<Book[]>;
+    private readonly booksInCart$: Observable<BooksId[]>;
 
     constructor(private sharedBooksService: SharedBooksService,
                 private cartStoreService: CartStoreService) {
-        this.books$ = this.sharedBooksService.getBooks()
+        this.books$ = this.sharedBooksService.getBooks();
+        this.booksInCart$ = this.cartStoreService.BooksInCart;
     }
 
     updateCart(booksCounter: BooksId): void {
         this.cartStoreService.updateCart(booksCounter)
     }
 
+    get BookInCart(): Observable<BookId[]> {
+        return this.booksInCart$
+    }
 
     get Books(): Observable<Book[]> {
         return this.books$;
     }
 
-    //Получение текущено значения книг из корзины
-    // get bookInCart$(): Observable<CartBookDetails[]> {
-    //     return this.cartStoreService.booksInCart$;
-    // }
-
 }
 
 export interface Book {
-    id: number,
-    title: string,
-    subtitle: string,
-    isbn13: string,
-    price: number,
-    image: string,
-    url: string,
+    id: number;
+    title: string;
+    subtitle: string;
+    isbn13: string;
+    price: number;
+    image: string;
+    url: string;
 }
 
 export interface BooksId {
-    id: number,
-    count: number,
+    id: number;
+    count: number;
 }

@@ -1,26 +1,26 @@
-<app-empty-cart *ngIf="!(totalBooksCount$ | async)"
+<app-empty-cart *ngIf="!(books$ | async)"
                notFoundMessage="Корзина пустая!"
-               resetLinkText="Вернуться на страницу книги"
->
+               resetLinkText="Вернуться на страницу книги">
 </app-empty-cart>
 
-<div  class="container" *ngIf="totalBooksCount$ | async">
+<div  class="container" *ngIf="books$ | async">
     <ul>
         <li *ngFor="let book of books$ | async">
             <div>
-                <img [src]="book.image" [alt]="book.title">
+                <img [src]="book.books.image" [alt]="book.books.title">
             </div>
             <div>
-                {{ book.title }}
+                {{ book.books.title }}
             </div>
             <div>
-                {{ book.price | currency }}
+                {{ book.books.price | currency }}
             </div>
             <div>
                 <div class="books-buttons" *ngIf="!(book.count === 0)">
                    <div class="counter">
                        <app-counter [initialText]="'Купить'"
-                                    (counterChange)="bookCounterChange$.next({id: book.id, count: $event})">
+                                    [counterValue]="book.count"
+                                    (counterChange)="bookCounterChange$.next({id: book.books.id, count: $event})">
                        </app-counter>
                    </div>
                 </div>
@@ -29,9 +29,9 @@
     </ul>
 
     <div class="checkout">
-        <div>
-            <div class="books-count">{{ totalBooksCount$ | async }} шт.</div>
-            <div class="total-price">{{ totalBooksPrice$ | async | currency }}</div>
+        <div *ngFor="let countAndPrice of calculateTotals$ | async">
+            <div class="books-count">{{ countAndPrice.count }} шт.</div>
+            <div class="total-price">{{ countAndPrice.price | currency }}</div>
         </div>
     </div>
 

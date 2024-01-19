@@ -1,14 +1,10 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {
-    BookWithCount,
+    BooksAndCount,
     ShoppingCartFacadeService
 } from "../../core/services/facadesManagement/shopping-cart.facade.service";
 import {ShoppingCartFacadeToken} from "./tokens/shoppingCartFacadeToken";
-import {count, filter, map, Observable, Subject, takeUntil, tap} from "rxjs";
-import {BookPriceAndCount, ShoppingCartHelper} from "./helpers/shoppingCartHelper";
-import {BooksId} from "../../core/services/facadesManagement/books.facade.service";
-
-
+import {filter, map, Observable, Subject, takeUntil} from "rxjs";
 
 @Component({
     selector: 'app-shopping-cart',
@@ -21,40 +17,38 @@ import {BooksId} from "../../core/services/facadesManagement/books.facade.servic
 })
 export class ShoppingCartComponent implements OnInit, OnDestroy{
 
-    constructor(@Inject(ShoppingCartFacadeToken) private shoppingCartFacadeService: IShoppingCartManager) {
-    }
+    constructor(@Inject(ShoppingCartFacadeToken) private shoppingCartFacadeService: IShoppingCartManager) {}
 
-    public books$: Observable<BookWithCount[]>;
-    public totalBooksPrice$: Observable<number>;
-    public totalBooksCount$: Observable<number>;
+    public books$: Observable<BooksAndCount[]>;
+    public calculateTotals$: Observable<BookPriceAndCount[]>;
 
-    public bookCounterChange$: Subject<CartBooksId> = new Subject<CartBooksId>();
-    destroy$: Subject<boolean> = new Subject<boolean>();
+
+    public bookCounterChange$: Subject<BooksId> = new Subject<BooksId>();
+    private destroy$: Subject<boolean> = new Subject<boolean>();
 
     ngOnInit(): void {
         this.books$ = this.shoppingCartFacadeService.BooksInCart;
 
-        const totals$: Observable<BookPriceAndCount> = ShoppingCartHelper.calculateTotals(this.books$);
-        this.totalBooksCount$ = totals$.pipe(map((totals: BookPriceAndCount)=> totals.count));
-        this.totalBooksPrice$ = totals$.pipe(map((totals: BookPriceAndCount) => totals.price));
+        this.calculateTotals$ = this.books$.pipe(
+            map((books: BooksAndCount[]) => {
+                const totalCount: number = books.reduce((acc, book) => acc + book.count, 0);
+                const totalPrice: number = books.reduce((acc, book) => acc + (book.count * book.books.price), 0);
+                return [{count: totalCount, price: totalPrice}];
+            })
+        );
 
         this. initializeSideEffect();
-
     }
 
-    initializeSideEffect(): void {
+   private initializeSideEffect(): void {
         this.bookCounterChange$.pipe(
-            filter(booksToCart  => booksToCart.count > 0),
+            filter(booksToCart  => booksToCart.count >= 0),
             takeUntil(this.destroy$),
-        ).subscribe((bookToCart: CartBooksId): void => {
-            const count: number = bookToCart.count > 0 ? bookToCart.count : 0;
-            const message = count > 0 ? `Заказали книгу по id ${bookToCart.id} в кол-ве ${count} шт` :
-                `Убрали из заказа книгу по id ${bookToCart.id}`;
-            console.log(message);
+        ).subscribe(bookToCart  => {
+            const count = bookToCart.count > 0 ? bookToCart.count : 0;
             this.shoppingCartFacadeService.updateCart({id: bookToCart.id, count})
         })
     }
-
     ngOnDestroy(): void {
         this.destroy$.next(true);
     }
@@ -62,11 +56,17 @@ export class ShoppingCartComponent implements OnInit, OnDestroy{
 }
 
 export interface IShoppingCartManager {
-    BooksInCart: Observable<BookWithCount[]>,
+    BooksInCart: Observable<BooksAndCount[]>,
     updateCart(booksId: BooksId): void,
 }
 
-export interface CartBooksId {
+export interface BooksId {
     id: number,
     count: number
 }
+
+interface BookPriceAndCount {
+    count: number,
+    price: number,
+}
+

@@ -10,21 +10,19 @@ export class ApiBooksService{
     constructor(private http: HttpClient) {
     }
 
-
     public getBooks(): Observable<IJson> {
         return this.http.get<IJson>('/assets/books.json');
     }
-
 
 }
 
 export interface IJson {
     error?: string,
     total?: string,
-    books: Book[]
+    books: Books[]
 }
 
-export interface Book{
+export interface Books{
     id: number,
     title: string,
     subtitle: string,

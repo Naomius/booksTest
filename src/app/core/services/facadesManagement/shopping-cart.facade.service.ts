@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import {IShoppingCartManager} from "../../../base/shoppingCart/shopping-cart.component";
 import {
-    combineLatest,
-    delay,
     map,
-    Observable, startWith, tap,
+    Observable,
     withLatestFrom
 } from "rxjs";
 import {CartBook, CartStoreService} from "../cartStore.service";
@@ -15,66 +13,35 @@ import {BooksId} from "./books.facade.service";
 @Injectable()
 export class ShoppingCartFacadeService implements IShoppingCartManager {
 
-    private readonly booksInCart$: Observable<BookWithCount[]>;
+    private readonly booksInCart$: Observable<BooksAndCount[]>;
   constructor(private cartStoreService: CartStoreService,
               private sharedBooksService: SharedBooksService) {
 
       this.booksInCart$ = this.cartStoreService.BooksInCart.pipe(
-          // delay(100),
-          tap(b => console.log(b)),
-          withLatestFrom(this.sharedBooksService.getBooks().pipe(
-              tap(b => console.log(b)),
-              startWith([])
-          )),
+          withLatestFrom(this.sharedBooksService.getBooks()),
           map(([cartBooks, books]) => {
               return cartBooks.map((bookInCart: CartBook) => {
-                  const currentBook: Book = books.find(book => book.id === bookInCart.id);
+                  const currentBook: Books = books.find(book => book.id === bookInCart.id);
                   return {
-                      id: currentBook.id,
-                      title: currentBook.title,
-                      subtitle: currentBook.subtitle,
-                      isbn13: currentBook.isbn13,
-                      price: currentBook.price,
-                      image: currentBook.image,
-                      url: currentBook.url,
+                      books: currentBook,
                       count: bookInCart.count
                   }
               })
           })
       )
-      // this.booksInCart$ = combineLatest([
-      //     this.cartStoreService.BooksInCart,
-      //     this.sharedBooksService.getBooks()
-      // ]).pipe(
-      //     map(([cartBooks, books]) => {
-      //         return cartBooks.map((bookInCart: CartBook) => {
-      //             const currentBook: Book = books.find(book => book.id === bookInCart.id);
-      //             return {
-      //                 id: currentBook.id,
-      //                 title: currentBook.title,
-      //                 subtitle: currentBook.subtitle,
-      //                 isbn13: currentBook.isbn13,
-      //                 price: currentBook.price,
-      //                 image: currentBook.image,
-      //                 url: currentBook.url,
-      //                 count: bookInCart.count
-      //             }
-      //         })
-      //     })
-      // )
   }
 
     updateCart(booksId: BooksId): void {
       this.cartStoreService.updateCart(booksId);
     }
 
-    get BooksInCart(): Observable<BookWithCount[]> {
+    get BooksInCart(): Observable<BooksAndCount[]> {
       return this.booksInCart$;
     }
 
 }
 
-export interface Book {
+export interface Books {
     id: number,
     title: string,
     subtitle: string,
@@ -84,8 +51,13 @@ export interface Book {
     url: string,
 }
 
-export interface BookWithCount extends Book {
+export interface BookWithCount extends Books {
     count: number
+}
+
+export interface BooksAndCount {
+    books: Books;
+    count: number;
 }
 
 

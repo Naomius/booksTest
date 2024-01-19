@@ -2,13 +2,14 @@ import {Injectable} from "@angular/core";
 import {IBookManager} from "../../../base/book/book.component";
 import {SharedBooksService} from "../booksService/shared-books.service";
 import {BehaviorSubject, map, Observable, Subject, switchMap} from "rxjs";
-import {Book, BooksId} from "./books.facade.service";
 import {CartStoreService} from "../cartStore.service";
 
 @Injectable()
 export class BookFacadeService implements IBookManager{
 
     private readonly currentBook$: Observable<Book>;
+    private readonly bookInCart$: Observable<BookId[]>
+
     private readonly getBookById$: Subject<number> = new BehaviorSubject<number>(null);
     constructor(private sharedBooksService: SharedBooksService,
                 private cartService: CartStoreService) {
@@ -19,9 +20,11 @@ export class BookFacadeService implements IBookManager{
                 )
             }),
         )
+
+        this.bookInCart$ = this.cartService.BooksInCart;
     }
-    updateCart(booksId: BooksId): void {
-        this.cartService.updateCart(booksId);
+    updateCart(bookId: BookId): void {
+        this.cartService.updateCart(bookId);
     }
     getBookId(id: number): void {
         this.getBookById$.next(id);
@@ -31,5 +34,23 @@ export class BookFacadeService implements IBookManager{
         return this.currentBook$;
     }
 
+    get BookInCart(): Observable<BookId[]> {
+        return this.bookInCart$;
+    }
+
 }
 
+interface Book {
+    id: number;
+    title: string;
+    subtitle: string;
+    isbn13: string;
+    price: number;
+    image: string;
+    url: string;
+}
+
+interface BookId {
+    id: number;
+    count: number;
+}

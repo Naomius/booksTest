@@ -7,7 +7,6 @@ import {FormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {MatInputModule} from "@angular/material/input";
 import {MatFormFieldModule} from "@angular/material/form-field";
-import {CounterComponent} from "../../shared/components/counter/counter.component";
 
 @NgModule({
     declarations: [
