@@ -19,10 +19,10 @@ export class ApiBooksService{
 export interface IJson {
     error?: string,
     total?: string,
-    books: Books[]
+    books: BookResponse[]
 }
 
-export interface Books{
+export interface BookResponse {
     id: number,
     title: string,
     subtitle: string,

@@ -19,7 +19,7 @@ export class ShoppingCartFacadeService implements IShoppingCartManager {
 
       this.booksInCart$ = this.cartStoreService.BooksInCart.pipe(
           withLatestFrom(this.sharedBooksService.getBooks()),
-          map(([cartBooks, books]) => {
+          map(([cartBooks, books]) => { //todo вынести map отдельным методом
               return cartBooks.map((bookInCart: CartBook) => {
                   const currentBook: Books = books.find(book => book.id === bookInCart.id);
                   return {

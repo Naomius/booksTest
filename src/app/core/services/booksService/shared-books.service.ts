@@ -16,7 +16,7 @@ export class SharedBooksService {
           switchMap((books: Book[]) => {
               if (!books || books.length === 0) {
                   return this.apiBooksService.getBooks().pipe(
-                      map(json => json.books.map(book => ({
+                      map(json => json.books.map(book => ({ //todo вынести map отдельным методом
                           ...book,
                           price: Number(book.price.replace(/[^0-9\.-]+/g, ""))
                       }))),

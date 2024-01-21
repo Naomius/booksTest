@@ -97,13 +97,10 @@ export class BooksComponent implements OnInit, OnDestroy {
 
     private initializeSideEffects(): void {
         this.bookCounterChange$.pipe(
-            filter(bookToCart => bookToCart.count > 0),
+            filter(bookToCart => bookToCart.count >= 0),
             takeUntil(this.destroy$)
         ).subscribe(bookToCart => {
             const count = bookToCart.count > 0 ? bookToCart.count : 0;
-            const message = count > 0 ? `Заказали книгу по id ${bookToCart.id} в кол-ве ${count} шт` :
-                `Убрали из заказа книгу по id ${bookToCart.id}`;
-            console.log(message);
             this.mainFacadeService.updateCart({id: bookToCart.id, count})
         });
     }

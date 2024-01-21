@@ -1,7 +1,6 @@
 import {Book} from "../../base/books/books.component";
 import {Sort} from "@angular/material/sort";
 
-
 export class BooksFacadeHelper {
     public static sortBooks(booksAndCount: BookAndCount[], sortEvent?: Sort): BookAndCount[] {
 

@@ -1,9 +1,6 @@
-<app-empty-cart *ngIf="!(books$ | async)"
-               notFoundMessage="Корзина пустая!"
-               resetLinkText="Вернуться на страницу книги">
-</app-empty-cart>
 
-<div  class="container" *ngIf="books$ | async">
+<div  class="container">
+<ng-container *ngIf="(books$ | async)?.length; else appEmptyCart">
     <ul>
         <li *ngFor="let book of books$ | async">
             <div>
@@ -16,7 +13,7 @@
                 {{ book.books.price | currency }}
             </div>
             <div>
-                <div class="books-buttons" *ngIf="!(book.count === 0)">
+                <div class="books-buttons">
                    <div class="counter">
                        <app-counter [initialText]="'Купить'"
                                     [counterValue]="book.count"
@@ -35,5 +32,12 @@
         </div>
     </div>
 
+</ng-container>
 </div>
 
+<ng-template #appEmptyCart>
+    <app-empty-cart
+        notFoundMessage="Корзина пустая!"
+        resetLinkText="Вернуться на страницу книги">
+    </app-empty-cart>
+</ng-template>
