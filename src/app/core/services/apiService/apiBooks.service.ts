@@ -10,13 +10,13 @@ export class ApiBooksService{
     constructor(private http: HttpClient) {
     }
 
-    public getBooks(): Observable<IJson> {
-        return this.http.get<IJson>('/assets/books.json');
+    public getBooks(): Observable<ApiData> {
+        return this.http.get<ApiData>('/assets/books.json');
     }
 
 }
 
-export interface IJson {
+export interface ApiData {
     error?: string,
     total?: string,
     books: BookResponse[]

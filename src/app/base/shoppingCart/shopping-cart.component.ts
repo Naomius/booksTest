@@ -36,7 +36,7 @@ export class ShoppingCartComponent implements OnInit, OnDestroy{
             })
         );
 
-        this. initializeSideEffect();
+        this.initializeSideEffect();
     }
 
    private initializeSideEffect(): void {

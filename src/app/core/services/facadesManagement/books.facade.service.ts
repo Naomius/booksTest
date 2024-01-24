@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {BookId, IBooksManager} from "../../../base/books/books.component";
 import {CartStoreService} from "../cartStore.service";
-import {SharedBooksService} from "../booksService/shared-books.service";
+import {SharedBooksService} from "../sharedBooksService/shared-books.service";
 
 
 @Injectable()

@@ -6,8 +6,8 @@ import {
     withLatestFrom
 } from "rxjs";
 import {CartBook, CartStoreService} from "../cartStore.service";
-import {SharedBooksService} from "../booksService/shared-books.service";
 import {BooksId} from "./books.facade.service";
+import {SharedBooksService} from "../sharedBooksService/shared-books.service";
 
 
 @Injectable()

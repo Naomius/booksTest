@@ -9,8 +9,8 @@ import {
     share,
     shareReplay,
     startWith,
-    Subject, takeUntil,
-    tap
+    Subject,
+    takeUntil
 } from "rxjs";
 import {MatButtonModule} from "@angular/material/button";
 
@@ -24,7 +24,7 @@ import {MatButtonModule} from "@angular/material/button";
 export class CounterComponent implements OnDestroy{
     @Input() initialText: string;
     @Input() set counterValue(value:number) {
-        this.counterValue$.next(value)
+        this.initialCount$.next(value)
     }
     @Output() counterChange: EventEmitter<number> = new EventEmitter<number>();
 
@@ -34,7 +34,7 @@ export class CounterComponent implements OnDestroy{
     leftArrowClick$: Subject<void> = new Subject<void>();
     manualChange$: Subject<string> = new Subject<string>();
     buttonClick$: Subject<void> = new Subject<void>();
-    counterValue$: ReplaySubject<number> = new ReplaySubject<number>(1);
+    initialCount$: ReplaySubject<number> = new ReplaySubject<number>(1);
     private destroy$: Subject<boolean> = new Subject<boolean>();
 
     constructor() {
@@ -42,7 +42,7 @@ export class CounterComponent implements OnDestroy{
                 this.rightArrowClick$.pipe(map(_ => ({action: 'plus', payload: null}))),
                 this.leftArrowClick$.pipe(map(_ => ({action: 'minus', payload: null}))),
                 this.manualChange$.pipe(map(num => ({action: 'eq', payload: num}))),
-                this.counterValue$.pipe(map(num => ({action: 'initial', payload: num}))),
+                this.initialCount$.pipe(map(num => ({action: 'initial', payload: num}))),
             ).pipe(
                 scan((acc, cur) => {
                     let newValue;

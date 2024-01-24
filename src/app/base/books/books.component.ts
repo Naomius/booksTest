@@ -27,8 +27,6 @@ import {BooksFacadeHelper} from "../../shared/helpers/booksFacadeHelper";
 export class BooksComponent implements OnInit, OnDestroy {
     @ViewChild('filterInput') filterInput: ElementRef<HTMLInputElement>;
 
-    displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
-
     private books$!: Observable<Book[]>;
     private booksInCart$!: Observable<BookId[]>;
     private booksAndItsCountInCart$!: Observable<BookAndCount[]>;
@@ -41,6 +39,7 @@ export class BooksComponent implements OnInit, OnDestroy {
     public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     private destroy$: Subject<boolean> = new Subject();
 
+    displayedColumns: string[] = ['position', 'image', 'name', 'price', 'description', 'buy'];
     constructor(@Inject(BooksFacadeToken) private mainFacadeService: IBooksManager) {}
 
     ngOnInit(): void {
